@@ -1,8 +1,8 @@
 import React from 'react';
 
-const ProductListSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 }) => {
+const ProductListSkeleton: React.FC<{ rows?: number; maxHeight?: number }> = ({ rows = 5, maxHeight = 40 }) => {
   return (
-    <div className="relative w-full max-h-[40vh] overflow-y-auto">
+    <div className="relative w-full overflow-y-auto" style={{ maxHeight: `${maxHeight}vh` }}>
       <table className="w-full text-sm text-gray-800 table-fixed">
         <thead className="bg-gray-50 text-gray-700 uppercase text-xs font-semibold sticky top-0 z-10">
           <tr>

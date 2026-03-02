@@ -4,6 +4,7 @@ import { X, ScanLine } from 'lucide-react';
 import { getProductByQRCode } from '@/services/small-collector/IWProductService';
 import ProductList from './ProductList';
 import Toast from '@/components/ui/Toast';
+import Pagination from '@/components/ui/Pagination';
 
 interface UpdatePackageProps {
     open: boolean;
@@ -14,6 +15,7 @@ interface UpdatePackageProps {
     initialData: {
         productsQrCode: string[];
     };
+    maxHeight?: number;
 }
 
 interface ScannedProduct {
@@ -28,7 +30,8 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
     open,
     onClose,
     onConfirm,
-    initialData
+    initialData,
+    maxHeight = 20
 }) => {
     // const [packageName, setPackageName] = useState('');
     const [qrCodeInput, setQrCodeInput] = useState('');
@@ -41,6 +44,8 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
     const inputRef = useRef<HTMLInputElement>(null);
     const lastProductRef = useRef<HTMLTableRowElement>(null);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const [productPage, setProductPage] = useState(1);
+    const PAGE_SIZE = 10;
 
     // Helper to show toast and immediately focus input
     const showToast = (message: string, type: 'success' | 'error' = 'error') => {
@@ -80,7 +85,7 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
             };
             loadExistingProducts();
             setQrCodeInput('');
-            setTimeout(() => inputRef.current?.focus(), 100);
+        setProductPage(1);
         }
     }, [open, initialData]);
 
@@ -137,6 +142,7 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
                     ...prev
                 ];
                 setSelectedIndex(0);
+                setProductPage(1);
                 // mark this qr as newly added in this session
                 setNewlyAdded((s) => {
                     const copy = new Set(s);
@@ -186,8 +192,20 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
         setQrCodeInput('');
         setScannedProducts([]);
         setNewlyAdded(new Set());
+        setProductPage(1);
         onClose();
     };
+
+    const totalPages = Math.ceil(scannedProducts.length / PAGE_SIZE);
+    const pagedProducts = scannedProducts.slice(
+        (productPage - 1) * PAGE_SIZE,
+        productPage * PAGE_SIZE
+    );
+    const pagedSelectedIndex =
+        selectedIndex !== null && selectedIndex < PAGE_SIZE ? selectedIndex : null;
+
+    // Cap maxHeight to avoid the product list growing too large and pushing footer out
+    const effectiveMaxHeight = Math.min(maxHeight ?? 30, 30);
 
     if (!open) return null;
 
@@ -216,7 +234,7 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
                 </div>
 
                 {/* Body */}
-                <div className='flex-1 p-6 space-y-6 bg-gray-50'>
+                <div className='flex-1 min-h-0 p-6 space-y-6 bg-gray-50'>
 
 
                     {/* QR Scanner */}
@@ -259,15 +277,26 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
                         </div>
 
                         <ProductList
-                            products={scannedProducts}
+                            products={pagedProducts}
                             mode='edit'
                             onRemoveProduct={handleRemoveProduct}
-                            selectedIndex={selectedIndex}
+                            selectedIndex={pagedSelectedIndex}
                             lastProductRef={lastProductRef}
                             striped={false}
                             loading={loading}
                             newItems={newlyAdded}
+                            indexOffset={(productPage - 1) * PAGE_SIZE}
+                            maxHeight={effectiveMaxHeight}
                         />
+                        {totalPages > 1 && (
+                            <div className='p-4 border-t'>
+                                <Pagination
+                                    page={productPage}
+                                    totalPages={totalPages}
+                                    onPageChange={setProductPage}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
 

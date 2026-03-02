@@ -20,6 +20,8 @@ interface ProductListProps {
     loading?: boolean;
     striped?: boolean;
     newItems?: Set<string>;
+    indexOffset?: number;
+    maxHeight?: number;
 }
 
 const ProductList: React.FC<ProductListProps> = ({
@@ -30,10 +32,12 @@ const ProductList: React.FC<ProductListProps> = ({
     lastProductRef,
     loading = false,
     striped = true,
-    newItems
+    newItems,
+    indexOffset = 0,
+    maxHeight = 40
 }) => {
     if (loading) {
-        return <ProductListSkeleton />;
+        return <ProductListSkeleton maxHeight={maxHeight} />;
     } else if (products.length === 0) {
         return (
             <div className='text-center py-8 text-gray-400'>
@@ -52,7 +56,7 @@ const ProductList: React.FC<ProductListProps> = ({
     }
 
     return (
-        <div className="relative w-full max-h-[40vh] overflow-y-auto">
+        <div className="relative w-full overflow-y-auto" style={{ maxHeight: `${maxHeight}vh` }}>
             <table className="w-full text-sm text-gray-800 table-fixed">
                 <thead className="bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-100">
                     <tr>
@@ -83,7 +87,7 @@ const ProductList: React.FC<ProductListProps> = ({
                             >
                                 <td className="py-3 px-4 font-medium text-center">
                                     <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs flex items-center justify-center font-semibold mx-auto">
-                                        {index + 1}
+                                        {indexOffset + index + 1}
                                     </span>
                                 </td>
                                 <td className="py-3 px-4 font-medium text-gray-900">

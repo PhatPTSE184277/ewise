@@ -10,18 +10,15 @@ import { usePackageContext } from '@/contexts/small-collector/PackageContext';
 interface PackageDetailProps {
     package: PackageType;
     onClose: () => void;
-}
-
-interface PackageDetailProps {
-    package: PackageType;
-    onClose: () => void;
     loading?: boolean;
+    maxHeight?: number;
 }
 
 const PackageDetail: React.FC<PackageDetailProps> = ({
     package: pkg,
     onClose,
-    loading = false
+    loading = false,
+    maxHeight = 40
 }) => {
     const { fetchPackageDetail } = usePackageContext();
     const [productPage, setProductPage] = useState(1);
@@ -123,6 +120,8 @@ const PackageDetail: React.FC<PackageDetailProps> = ({
                                             qrCode: p.qrCode ?? undefined
                                         }))}
                                         mode='view'
+                                        indexOffset={(productPage - 1) * 10}
+                                        maxHeight={maxHeight}
                                     />
                                 </div>
                                 {pkg.products.totalPages > 1 && (

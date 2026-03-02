@@ -1,30 +1,48 @@
 'use client';
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Tag, Boxes } from 'lucide-react';
+import SummaryCard from '@/components/ui/SummaryCard';
 
 interface ConfirmStatusChangeProps {
     open: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    packageId?: string;
+    productCount?: number;
+    status?: string;
 }
 
 const ConfirmStatusChange: React.FC<ConfirmStatusChangeProps> = ({
     open,
     onClose,
-    onConfirm
+    onConfirm,
+    packageId,
+    productCount,
 }) => {
     if (!open) return null;
 
+    const summaryItems = [
+        {
+            icon: <Tag size={14} className='text-primary-400' />,
+            label: 'Mã package',
+            value: packageId || '-',
+        },
+        {
+            icon: <Boxes size={14} className='text-primary-400' />,
+            label: 'Số sản phẩm',
+            value: productCount ?? 0,
+        }
+    ];
+
     return (
         <div className='fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4'>
-            {/* Overlay */}
+            {/* Overlay (click disabled - modal only closes with X or explicit confirm) */}
             <div
                 className='absolute inset-0 bg-black/30 backdrop-blur-sm'
-                onClick={onClose}
             ></div>
 
             {/* Modal container */}
-            <div className='relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden z-10 animate-fadeIn'>
+            <div className='relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[96vh] animate-fadeIn'>
                 {/* Header */}
                 <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 border-primary-100'>
                     <div>
@@ -42,6 +60,8 @@ const ConfirmStatusChange: React.FC<ConfirmStatusChangeProps> = ({
 
                 {/* Body */}
                 <div className='p-6 space-y-4'>
+                    <SummaryCard items={summaryItems} singleRow={true} />
+
                     <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-4'>
                         <p className='text-sm text-yellow-800 font-medium mb-2'>
                             Cảnh báo quan trọng

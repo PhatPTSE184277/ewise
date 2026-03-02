@@ -124,7 +124,7 @@ const PackagePage: React.FC = () => {
 
     const handleOpenUpdate = async (pkg: PackageType) => {
         try {
-            await fetchPackageDetail(pkg.packageId, 1, 10);
+            await fetchPackageDetail(pkg.packageId, 1, 1000);
             setShowDetailModal(false);
             setShowUpdateModal(true);
         } catch (error) {
@@ -203,6 +203,7 @@ const PackagePage: React.FC = () => {
                     package={selectedPackage}
                     onClose={handleCloseModal}
                     loading={loadingDetail}
+                    maxHeight={56}
                 />
             )}
 
@@ -225,18 +226,30 @@ const PackagePage: React.FC = () => {
                     initialData={{
                         productsQrCode: selectedPackage.products.data.map(p => p.qrCode).filter(Boolean) as string[]
                     }}
+                    maxHeight={56}
                 />
             )}
 
             {/* Confirm Status Change Modal */}
-            <ConfirmStatusChange
-                open={showConfirmModal}
-                onClose={() => {
-                    setShowConfirmModal(false);
-                    setPackageToUpdateStatus(null);
-                }}
-                onConfirm={handleConfirmUpdateStatus}
-            />
+            {(() => {
+                const pkgForConfirm = packageToUpdateStatus
+                    ? packages.find((p) => p.packageId === packageToUpdateStatus)
+                    : selectedPackage;
+
+                return (
+                    <ConfirmStatusChange
+                        open={showConfirmModal}
+                        onClose={() => {
+                            setShowConfirmModal(false);
+                            setPackageToUpdateStatus(null);
+                        }}
+                        onConfirm={handleConfirmUpdateStatus}
+                        packageId={packageToUpdateStatus ?? pkgForConfirm?.packageId}
+                        productCount={pkgForConfirm?.products?.totalItems}
+                        status={pkgForConfirm?.status}
+                    />
+                );
+            })()}
 
             <ScanDeliveryQRModal
                 open={showScanDeliveryModal}
