@@ -57,7 +57,7 @@ const RecyclingSelectModal: React.FC<RecyclingSelectModalProps> = ({
                 </div>
 
                 {/* Search */}
-                <div className='p-4 border-b bg-gray-50'>
+                <div className='p-4 bg-gray-50'>
                     <SearchBox
                         value={search}
                         onChange={setSearch}

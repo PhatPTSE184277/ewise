@@ -61,7 +61,7 @@ const ImportShiftModal: React.FC<ImportShiftModalProps> = ({ open, onClose, onIm
             {/* Modal container */}
             <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn">
                 {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100">
+                <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-800">Nhập File Excel</h2>
                         <p className="text-sm text-gray-600 mt-1">Chọn file Excel để nhập dữ liệu ca làm việc</p>

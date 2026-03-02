@@ -26,7 +26,7 @@ const EditSystemConfigModal: React.FC<EditSystemConfigModalProps> = ({
     useEffect(() => {
         if (open && config) {
             const isUrlConfig = config.value?.startsWith('http://') || config.value?.startsWith('https://');
-            setIsUrl(isUrlConfig);
+            setIsUrl(isUrlConfig || config.key.toLowerCase().includes('url') || config.key.toLowerCase().includes('file'));
             
             if (!isUrlConfig) {
                 const num = Number(config.value);
@@ -64,7 +64,7 @@ const EditSystemConfigModal: React.FC<EditSystemConfigModalProps> = ({
             {/* Modal container */}
             <div className='relative w-full bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn' style={{maxWidth: Math.max(600, Math.min(1100, (config?.displayName?.length || 0) * 16 + 600))}}>
                 {/* Header */}
-                <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100'>
+                <div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
                     <h2 className='text-2xl font-bold text-gray-800'>Chỉnh sửa cấu hình</h2>
                     <button
                         onClick={handleClose}

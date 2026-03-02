@@ -81,7 +81,7 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                         <div className='overflow-x-auto'>
                             <div className='inline-block min-w-full align-middle'>
                                 <div className='overflow-hidden'>
-                                    <div className='max-h-[70vh] overflow-y-auto'>
+                                    <div className='max-h-[50vh] overflow-y-auto'>
                                         <table className='w-full text-sm text-gray-800 table-fixed'>
                                             <thead className='bg-gray-50 text-gray-700 uppercase text-xs font-semibold sticky top-0 z-10'>
                                                 <tr>
@@ -149,7 +149,7 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                 </div>
 
                 {/* Footer: show selected count on the left, confirm button on the right */}
-                <div className='flex items-center justify-between gap-3 p-6 border-t bg-gray-50'>
+                <div className='flex items-center justify-between gap-3 p-6 bg-gray-50'>
                     <div>
                         {hasSelection ? (
                             <span className='text-sm font-medium text-primary-700'>

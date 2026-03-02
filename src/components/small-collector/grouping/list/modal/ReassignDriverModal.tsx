@@ -59,7 +59,7 @@ const ReassignDriverModal: React.FC<ReassignDriverModalProps> = ({
             {/* Modal container */}
             <div className='relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col z-10 max-h-[98vh] animate-fadeIn' style={{ overflow: 'visible' }}>
                 {/* Header */}
-                <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 rounded-t-2xl'>
+                <div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100 rounded-t-2xl'>
                     <div>
                         <h2 className='text-2xl font-bold text-gray-800'>
                                 Phân lại tài xế

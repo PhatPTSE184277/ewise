@@ -132,7 +132,7 @@ const CreateNotiModal: React.FC<CreateNotiModalProps> = ({
 
             <div className='relative w-full max-w-6xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[98vh] min-h-[90vh]'>
                 {/* Header */}
-                <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100'>
+                <div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
                     <div className='flex items-center gap-3'>
                         {step === 2 && (
                             <button
@@ -228,38 +228,41 @@ const CreateNotiModal: React.FC<CreateNotiModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className='flex items-center justify-between gap-3 p-6 border-t bg-gray-50'>
-                    {step === 2 && selectedUserIds.length > 0 ? (
-                        <span className='text-sm font-medium text-gray-700'>
-                            Đã chọn {selectedUserIds.length} người
-                        </span>
-                    ) : <span />}
-                    <div className='flex gap-3'>
-                        {step === 1 ? (
-                            <button
-                                onClick={handleContinue}
-                                disabled={!title.trim() || !message.trim()}
-                                className={`px-6 py-2.5 rounded-xl transition font-medium cursor-pointer ${
-                                    !title.trim() || !message.trim()
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'bg-primary-600 text-white hover:bg-primary-700'
-                                }`}
-                            >
-                                Tiếp tục
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleSubmit}
-                                disabled={selectedUserIds.length === 0 || sending}
-                                className={`px-6 py-2.5 rounded-xl transition font-medium cursor-pointer ${
-                                    selectedUserIds.length === 0 || sending
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'bg-primary-600 text-white hover:bg-primary-700'
-                                }`}
-                            >
-                                {sending ? 'Đang gửi...' : 'Gửi thông báo'}
-                            </button>
+                <div className='flex justify-end items-center gap-3 p-5 border-t border-primary-100 bg-white'>
+                    <div className='flex items-center gap-3'>
+                        {step === 2 && selectedUserIds.length > 0 && (
+                            <span className='text-sm font-medium text-gray-700'>
+                                Đã chọn {selectedUserIds.length} người
+                            </span>
                         )}
+
+                        <div className='flex gap-3'>
+                            {step === 1 ? (
+                                <button
+                                    onClick={handleContinue}
+                                    disabled={!title.trim() || !message.trim()}
+                                    className={`px-6 py-2.5 rounded-xl transition font-medium cursor-pointer ${
+                                        !title.trim() || !message.trim()
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                            : 'bg-primary-600 text-white hover:bg-primary-700'
+                                    }`}
+                                >
+                                    Tiếp tục
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={selectedUserIds.length === 0 || sending}
+                                    className={`px-6 py-2.5 rounded-xl transition font-medium cursor-pointer ${
+                                        selectedUserIds.length === 0 || sending
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                            : 'bg-primary-600 text-white hover:bg-primary-700'
+                                    }`}
+                                >
+                                    {sending ? 'Đang gửi...' : 'Gửi thông báo'}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
