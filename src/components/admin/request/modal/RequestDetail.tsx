@@ -87,7 +87,7 @@ const RequestDetail: React.FC<RequestDetailProps> = ({
             {/* Modal */}
             <div className='relative w-full max-w-7xl bg-white rounded-2xl shadow-2xl overflow-y-auto z-10 animate-scaleIn max-h-[90vh] flex flex-col'>
                 {/* Header */}
-                <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100'>
+                <div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
                     <div className='flex flex-col gap-1'>
                         <h2 className='text-2xl font-bold text-gray-800'>
                             Chi tiết bài đăng
