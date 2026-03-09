@@ -186,8 +186,8 @@ const ScanPackageModal: React.FC<ScanPackageModalProps> = ({
                                         label: 'Trạng thái',
                                         value: (
                                             <span
-                                                className="flex items-center justify-center h-8 px-4 rounded-full text-sm font-medium bg-primary-600 text-white"
-                                                style={{ minWidth: 110 }}
+                                                className="flex items-center justify-center h-8 px-4 rounded-full text-sm font-medium bg-transparent text-primary-700"
+                                                style={{ minWidth: 140 }}
                                             >
                                                 {scannedPackage.status}
                                             </span>
@@ -209,7 +209,7 @@ const ScanPackageModal: React.FC<ScanPackageModalProps> = ({
                                     products={scannedPackage.products}
                                     showPagination={true}
                                     onPageChange={handlePageChange}
-                                    maxHeight={230}
+                                    maxHeight={215}
                                 />
                             </div>
                         </>

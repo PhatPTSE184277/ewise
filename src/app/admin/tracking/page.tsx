@@ -9,7 +9,6 @@ import TrackingProductFilter from '@/components/admin/tracking/TrackingProductFi
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import CustomDateRangePicker from '@/components/ui/CustomDateRangePicker';
 import { getFirstDayOfMonthString, getTodayString } from '@/utils/getDayString';
-import SearchBox from '@/components/ui/SearchBox';
 
 const TrackingPage: React.FC = () => {
     const { companies, packages, loadingPackages, fetchPackages } = useTrackingContext();
@@ -18,7 +17,6 @@ const TrackingPage: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     // const [showCompanyModal, setShowCompanyModal] = useState(false);
     const [statusFilter, setStatusFilter] = useState('Đang đóng gói');
-    const [search, setSearch] = useState<string>("");
     const [fromDate, setFromDate] = useState(getFirstDayOfMonthString);
     const [toDate, setToDate] = useState(getTodayString);
 
@@ -57,15 +55,7 @@ const TrackingPage: React.FC = () => {
         setStatusFilter(status);
     };
 
-    // Search locally and add stt
-    const searchTerm = search.trim().toLowerCase();
-    const displayPackages = searchTerm
-        ? packages.filter((pkg: any) =>
-            (pkg.packageId || '').toLowerCase().includes(searchTerm)
-        )
-        : packages;
-
-    const paginatedPackages = displayPackages.map((pkg, idx) => ({
+    const paginatedPackages = packages.map((pkg, idx) => ({
         ...pkg,
         stt: idx + 1
     }));
@@ -94,13 +84,7 @@ const TrackingPage: React.FC = () => {
                                 placeholder='Chọn công ty...'
                             />
                         </div>
-                        <div className='flex-1 max-w-md'>
-                            <SearchBox
-                                value={search}
-                                onChange={setSearch}
-                                placeholder="Tìm kiếm package..."
-                            />
-                        </div>
+                        
                         <div className='min-w-fit'>
                             <CustomDateRangePicker
                                 fromDate={fromDate}

@@ -19,9 +19,9 @@ const CapacityWarehouseList: React.FC<CapacityWarehouseListProps> = ({ warehouse
                             <tr>
                                 <th className='py-3 px-4 text-center w-[5vw]'>STT</th>
                                 <th className='py-3 px-4 text-left w-[20vw]'>Tên kho</th>
-                                <th className='py-3 px-4 text-right w-[14vw]'>Sức chứa tối đa (kg)</th>
-                                <th className='py-3 px-4 text-right w-[14vw]'>Đang chứa (kg)</th>
-                                <th className='py-3 px-4 text-right w-[14vw]'>Còn trống (kg)</th>
+                                <th className='py-3 px-4 text-right w-[14vw]'>Sức chứa tối đa (m³)</th>
+                                <th className='py-3 px-4 text-right w-[14vw]'>Đang chứa (m³)</th>
+                                <th className='py-3 px-4 text-right w-[14vw]'>Còn trống (m³)</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -48,9 +48,10 @@ const SearchableSelect = <T,>({
 					   isOpen ? 'ring-2 ring-primary-400 border-primary-400' : ''
 				   } ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
 			>
-				<span className={
-    (selectedOption ? 'text-gray-900' : 'text-gray-400') + ' text-center w-full'
-}>
+				<span
+					title={selectedOption ? getLabel(selectedOption) : undefined}
+					className={(selectedOption ? 'text-gray-900' : 'text-gray-400') + ' text-center w-full truncate'}
+				>
 					{selectedOption ? getLabel(selectedOption) : placeholder}
 				</span>
 				   <div className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>

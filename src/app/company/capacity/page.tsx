@@ -45,7 +45,7 @@ const CapacityPage: React.FC = () => {
                                     <h3 className={isPrimary ? 'text-lg font-semibold text-white' : 'text-lg font-semibold text-primary-700'}>{s.title}</h3>
                                     <TrendingUp size={18} className={isPrimary ? 'text-white opacity-80' : 'text-primary-400 opacity-80'} />
                                     <span className={isPrimary ? 'text-3xl font-bold ml-4 text-white' : 'text-3xl font-bold ml-4 text-primary-600'}>
-                                        {formatWeightKg(safeValue)} <span className={isPrimary ? 'text-sm font-normal text-white' : 'text-sm font-normal text-gray-500'}>kg</span>
+                                        {formatWeightKg(safeValue)} <span className={isPrimary ? 'text-sm font-normal text-white' : 'text-sm font-normal text-gray-500'}>m³</span>
                                     </span>
                                 </div>
                             </div>

@@ -98,7 +98,7 @@ const ProductList: React.FC<ProductListProps> = ({
                 </table>
             </div>
             {showPagination && onPageChange && totalPages > 1 && (
-                <div className='px-4 pb-4 border-t'>
+                <div className='px-4 pb-4 border-t border-primary-100'>
                     <Pagination
                         page={currentPage}
                         totalPages={totalPages}

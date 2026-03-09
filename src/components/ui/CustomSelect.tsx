@@ -52,10 +52,8 @@ const CustomSelect = <T,>({
                 } ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             >
                 <span
-                    className={
-                        (selectedOption ? 'text-gray-900' : 'text-gray-400') +
-                        ' text-center w-full'
-                    }
+                    title={selectedOption ? getLabel(selectedOption) : undefined}
+                    className={(selectedOption ? 'text-gray-900' : 'text-gray-400') + ' text-center w-full truncate'}
                 >
                     {selectedOption ? getLabel(selectedOption) : placeholder}
                 </span>

@@ -4,8 +4,7 @@ import {
     Package,
     CalendarClock,
     Truck,
-    Settings2,
-    Warehouse
+    Settings2
 } from 'lucide-react';
 
 export const MenuItems = [
@@ -45,10 +44,10 @@ export const MenuItems = [
         path: '/company/setting-group',
         icon: <Settings2 size={20} />
     },
-    {
-        id: 'capacity',
-        label: 'Năng lực kho',
-        path: '/company/capacity',
-        icon: <Warehouse size={20} />
-    },
+    // {
+    //     id: 'capacity',
+    //     label: 'Năng lực kho',
+    //     path: '/company/capacity',
+    //     icon: <Warehouse size={20} />
+    // },
 ];

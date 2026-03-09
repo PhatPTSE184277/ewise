@@ -96,9 +96,9 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                                                     <th className='py-3 px-4 text-center w-[5vw]'>STT</th>
                                                     <th className='py-3 px-4 text-left w-[18vw]'>Công ty</th>
                                                     <th className='py-3 px-4 text-left w-[14vw]'>Địa chỉ</th>
-                                                    <th className='py-3 px-4 text-right w-[12vw]'>Sức chứa tối đa (kg)</th>
-                                                    <th className='py-3 px-4 text-right w-[12vw]'>Đang chứa (kg)</th>
-                                                    <th className='py-3 px-4 text-right w-[12vw]'>Còn trống (kg)</th>
+                                                    <th className='py-3 px-4 text-right w-[12vw]'>Sức chứa tối đa (m³)</th>
+                                                    <th className='py-3 px-4 text-right w-[12vw]'>Đang chứa (m³)</th>
+                                                    <th className='py-3 px-4 text-right w-[12vw]'>Còn trống (m³)</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
