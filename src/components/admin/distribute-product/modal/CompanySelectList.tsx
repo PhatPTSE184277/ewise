@@ -45,9 +45,9 @@ const CompanySelectList: React.FC<CompanySelectListProps> = ({
             <td className='py-3 px-4 text-right w-[12vw]'>
                 <span className='text-gray-700 font-medium'>{formatWeightKg(company.maxCapacity ?? 0)}</span>
             </td>
-            <td className='py-3 px-4 text-right w-[12vw]'>
+            {/* <td className='py-3 px-4 text-right w-[12vw]'>
                 <span className='text-gray-700 font-medium'>{formatWeightKg(company.currentCapacity ?? 0)}</span>
-            </td>
+            </td> */}
             <td className='py-3 px-4 text-right w-[12vw]'>
                 <span className='text-gray-700 font-medium'>{formatWeightKg(company.availableCapacity ?? 0)}</span>
             </td>
