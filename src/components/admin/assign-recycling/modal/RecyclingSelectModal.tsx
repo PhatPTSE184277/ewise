@@ -39,7 +39,7 @@ const RecyclingSelectModal: React.FC<RecyclingSelectModalProps> = ({
             <div className='absolute inset-0 bg-black/30 backdrop-blur-sm'></div>
 
             {/* Modal container */}
-            <div className='relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[80vh]'>
+            <div className='relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[80vh]'>
                 {/* Header */}
                 <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 border-primary-100 rounded-t-2xl'>
                     <div>

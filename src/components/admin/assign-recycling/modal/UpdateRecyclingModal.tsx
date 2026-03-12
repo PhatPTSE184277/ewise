@@ -86,7 +86,7 @@ const UpdateRecyclingModal: React.FC<UpdateRecyclingModalProps> = ({
     return (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
             <div className='absolute inset-0 bg-black/30 backdrop-blur-sm'></div>
-            <div className='relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-visible z-10 max-h-[90vh]'>
+            <div className='relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-visible z-10 max-h-[90vh]'>
                 {/* Header */}
                 <div className='flex justify-between items-center p-6 bg-linear-to-r from-primary-50 to-primary-100 rounded-t-2xl'>
                     <div>
@@ -104,9 +104,6 @@ const UpdateRecyclingModal: React.FC<UpdateRecyclingModalProps> = ({
                 <div className='flex-1 overflow-visible p-6 space-y-6'>
                     {/* Small Collection Points */}
                     <div className='space-y-2'>
-                        <label className='block text-sm font-medium text-gray-700'>
-                            Điểm thu gom nhỏ
-                        </label>
                         <AssignRecyclingPointList
                             points={smallPoints}
                             loading={loading}

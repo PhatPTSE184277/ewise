@@ -7,7 +7,7 @@ import PackageList from '@/components/small-collector/package/modal/PackageList'
 import Toast from '@/components/ui/Toast';
 import { useSmallCollectorQR } from '@/contexts/small-collector/QRContext';
 import { usePackageContext } from '@/contexts/small-collector/PackageContext';
-import { filterPackages } from '@/services/small-collector/PackageService';
+import { filterPackages, getDeliveryTracking } from '@/services/small-collector/PackageService';
 import { useAuth } from '@/redux';
 import type { PackageType } from '@/types/Package';
 
@@ -22,9 +22,11 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
     const { handleDeliverPackages } = usePackageContext();
 
     const [qrCode, setQrCode] = useState('');
+    const [scannedQrCode, setScannedQrCode] = useState('');
     const [companyInfo, setCompanyInfo] = useState<any | null>(null);
     const [closedPackages, setClosedPackages] = useState<PackageType[]>([]);
     const [scanned, setScanned] = useState<boolean>(false);
+    const [isAlreadyUsed, setIsAlreadyUsed] = useState(false);
     const [loadingPackages, setLoadingPackages] = useState(false);
 
     const [toastOpen, setToastOpen] = useState(false);
@@ -36,9 +38,11 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
     useEffect(() => {
         if (open) {
             setQrCode('');
+            setScannedQrCode('');
             setCompanyInfo(null);
             setClosedPackages([]);
             setScanned(false);
+            setIsAlreadyUsed(false);
             setTimeout(() => inputRef.current?.focus(), 100);
         }
     }, [open]);
@@ -76,28 +80,50 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
         try {
             const res = await verify(code);
             setCompanyInfo(res);
+            setScannedQrCode(code);
+            setIsAlreadyUsed(false);
             await loadClosedPackages();
             // auto-select all packages (no manual selection UI)
             // we rely on closedPackages state when confirming
             setScanned(true);
         } catch (e: any) {
             const rawMsg = e?.response?.data?.message || e?.message || 'QR không hợp lệ';
-            const translations: Record<string, string> = {
-                'Invalid or expired QR code.': 'Mã QR không hợp lệ hoặc đã hết hạn',
-                'Invalid or expired QR code': 'Mã QR không hợp lệ hoặc đã hết hạn',
-                'QR is invalid': 'Mã QR không hợp lệ',
-                'Not found': 'Không tìm thấy',
-            };
-            let msg: string = typeof rawMsg === 'string' ? rawMsg : 'QR không hợp lệ';
-            for (const key in translations) {
-                if (typeof rawMsg === 'string' && rawMsg.includes(key)) {
-                    msg = translations[key];
-                    break;
+            const isUsed =
+                typeof rawMsg === 'string' &&
+                rawMsg.toLowerCase().includes('qr code giao hàng đã được sử dụng');
+
+            if (isUsed) {
+                // Load packages already delivered by this QR
+                setLoadingPackages(true);
+                try {
+                    const trackingRes = await getDeliveryTracking(code);
+                    setClosedPackages(trackingRes.data || []);
+                    setScannedQrCode(code);
+                    setIsAlreadyUsed(true);
+                    setScanned(true);
+                } catch {
+                    showToast('Không tải được danh sách gói đã giao', 'error');
+                } finally {
+                    setLoadingPackages(false);
                 }
+            } else {
+                const translations: Record<string, string> = {
+                    'Invalid or expired QR code.': 'Mã QR không hợp lệ hoặc đã hết hạn',
+                    'Invalid or expired QR code': 'Mã QR không hợp lệ hoặc đã hết hạn',
+                    'QR is invalid': 'Mã QR không hợp lệ',
+                    'Not found': 'Không tìm thấy',
+                };
+                let msg: string = typeof rawMsg === 'string' ? rawMsg : 'QR không hợp lệ';
+                for (const key in translations) {
+                    if (typeof rawMsg === 'string' && rawMsg.includes(key)) {
+                        msg = translations[key];
+                        break;
+                    }
+                }
+                showToast(msg, 'error');
+                setCompanyInfo(null);
+                setClosedPackages([]);
             }
-            showToast(msg, 'error');
-            setCompanyInfo(null);
-            setClosedPackages([]);
         } finally {
             setQrCode('');
         }
@@ -109,7 +135,7 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
             return;
         }
         const ids = closedPackages.map((p) => p.packageId);
-        await handleDeliverPackages(ids);
+        await handleDeliverPackages(ids, scannedQrCode);
         showToast('Đã xác nhận giao hàng', 'success');
         onClose();
     };
@@ -175,8 +201,17 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
                     )}
 
                     {/* Hiện thông tin tóm tắt và danh sách chỉ khi quét thành công */}
-                    {scanned && companyInfo && (
+                    {scanned && companyInfo && !isAlreadyUsed && (
                         <SummaryCard items={summaryItems} singleRow={true} label={'Thông tin công ty'} />
+                    )}
+
+                    {scanned && isAlreadyUsed && (
+                        <div className='bg-amber-50 border border-amber-200 rounded-xl p-4'>
+                            <div>
+                                <p className='font-semibold text-amber-800'>QR code đã được sử dụng</p>
+                                <p className='text-sm text-amber-700 mt-0.5'>Danh sách các gói đã được giao bằng mã QR này:</p>
+                            </div>
+                        </div>
                     )}
 
                     {scanned ? (
@@ -186,7 +221,7 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
                         />
                     ) : null}
                 </div>
-                {scanned ? (
+                {scanned && !isAlreadyUsed ? (
                     <div className='p-5 border-t border-primary-100 bg-white flex justify-end gap-3'>
                         <button
                             onClick={handleConfirm}

@@ -144,7 +144,6 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
         if (isGroupingNotif) {
             // Extract date from message or use createdAt
             let groupingDate = '';
-            
             // Try to extract date from message first (format: DD/MM/YYYY)
             const dateMatch = notif.message?.match(/\d{2}\/\d{2}\/\d{4}/);
             if (dateMatch) {
@@ -160,17 +159,16 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
             }
 
             if (groupingDate) {
-                // Check if this is an assignment notification that can be rejected
-                const isAssignmentNotif = notif.message?.includes('nhận được') || 
-                    notif.message?.includes('phân bổ') ||
+                // Only trigger reject modal for assignment notifications (phân bổ)
+                const isAssignmentNotif = notif.message?.includes('phân bổ') ||
                     notif.message?.includes('Phân bổ') ||
                     notif.title?.includes('phân bổ') ||
                     notif.title?.includes('Phân bổ');
-                
+
                 // Set navigation parameters for grouping
                 sessionStorage.setItem('grouping_nav_date', groupingDate);
                 sessionStorage.setItem('grouping_nav_trigger', 'notification');
-                
+
                 // If it's an assignment notification, trigger reject modal
                 if (isAssignmentNotif) {
                     sessionStorage.setItem('grouping_reject_trigger', 'show_reject_modal');

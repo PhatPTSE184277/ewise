@@ -64,8 +64,19 @@ export const deliverPackage = async (packageId: string): Promise<any> => {
     return response.data;
 };
 
-export const deliverPackages = async (packageIds: string[]): Promise<any> => {
-    const response = await axios.put('/packages/delivery', { packageIds });
+export const deliverPackages = async (packageIds: string[], deliveryQrCode: string): Promise<any> => {
+    const response = await axios.put('/packages/delivery', { deliveryQrCode, packageIds });
+    return response.data;
+};
+
+export const getDeliveryTracking = async (
+    qrCode: string,
+    page: number = 1,
+    limit: number = 100
+): Promise<FilterPackagesResponse> => {
+    const response = await axios.get<FilterPackagesResponse>(`/packages/delivery-tracking/${qrCode}`, {
+        params: { page, limit }
+    });
     return response.data;
 };
 

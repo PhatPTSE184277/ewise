@@ -55,7 +55,7 @@ interface PackageContextType {
         closed: number;
     };
     handleDeliverPackage: (packageId: string) => Promise<void>;
-    handleDeliverPackages: (packageIds: string[]) => Promise<void>;
+    handleDeliverPackages: (packageIds: string[], deliveryQrCode: string) => Promise<void>;
     handleSendPackageToRecycler: (packageId: string) => Promise<void>;
 }
 
@@ -247,14 +247,15 @@ export const PackageProvider: React.FC<Props> = ({ children }) => {
     );
 
     const handleDeliverPackages = useCallback(
-        async (packageIds: string[]) => {
+        async (packageIds: string[], deliveryQrCode: string) => {
             setLoadingList(true);
             try {
-                await deliverPackages(packageIds);
+                await deliverPackages(packageIds, deliveryQrCode);
                 await fetchPackages();
                 await fetchAllStats();
             } catch (err) {
                 console.error('handleDeliverPackages error', err);
+                throw err;
             } finally {
                 setLoadingList(false);
             }

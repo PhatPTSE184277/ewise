@@ -80,16 +80,16 @@ const RequestList = React.forwardRef<HTMLDivElement, RequestListProps>(({
               <table className="min-w-full text-sm text-gray-800 table-fixed">
                 <thead className="bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-200">
                   <tr>
-                    <th className="py-3 px-4 text-center w-[5vw] min-w-[5vw] tracking-wide">
-                      {isPending && (
+                    {isPending && (
+                      <th className="py-3 px-4 text-center w-[5vw] min-w-[5vw] tracking-wide">
                         <button
                           onClick={onToggleSelectAll}
                           className="text-primary-600 hover:text-primary-800"
                         >
                           {allCurrentPageSelected ? <CheckSquare size={18} /> : <Square size={18} />}
                         </button>
-                      )}
-                    </th>
+                      </th>
+                    )}
                     <th className="py-3 px-4 text-center w-[5vw] tracking-wide">STT</th>
                     <th className="py-3 px-4 text-left w-[14vw] tracking-wide">Người gửi</th>
                     <th className="py-3 px-4 text-left w-[18vw] tracking-wide">Danh mục</th>
@@ -121,7 +121,7 @@ const RequestList = React.forwardRef<HTMLDivElement, RequestListProps>(({
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="text-center py-8 text-gray-400">
+                      <td colSpan={isPending ? 7 : 6} className="text-center py-8 text-gray-400">
                         Không có yêu cầu nào.
                       </td>
                     </tr>

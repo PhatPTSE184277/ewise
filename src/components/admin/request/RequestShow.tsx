@@ -42,19 +42,21 @@ const RequestShow: React.FC<RequestShowProps & { isLast?: boolean; rowIndex?: nu
 
     return (
         <tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}>
-            <td className="py-3 px-4 text-center w-16">
-                {isPending && onToggleSelect ? (
-                    <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => onToggleSelect(post.id)}
-                        className="w-4 h-4 text-primary-600 bg-white rounded focus:ring-2 focus:ring-primary-500 cursor-pointer border-0 shadow-none outline-none"
-                        style={{ boxShadow: 'none', outline: 'none', border: 'none' }}
-                    />
-                ) : (
-                    <div className="w-4 h-4"></div>
-                )}
-            </td>
+            {isPending && (
+                <td className="py-3 px-4 text-center w-16">
+                    {onToggleSelect ? (
+                        <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => onToggleSelect(post.id)}
+                            className="w-4 h-4 text-primary-600 bg-white rounded focus:ring-2 focus:ring-primary-500 cursor-pointer border-0 shadow-none outline-none"
+                            style={{ boxShadow: 'none', outline: 'none', border: 'none' }}
+                        />
+                    ) : (
+                        <div className="w-4 h-4"></div>
+                    )}
+                </td>
+            )}
             <td className="py-3 px-4 text-center w-[5vw]">
                 <span className="inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2">
                     {formatNumber(stt)}

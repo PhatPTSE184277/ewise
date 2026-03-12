@@ -49,23 +49,27 @@ const RejectAssignmentModal: React.FC<RejectAssignmentModalProps> = ({
 
     return (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
-            <div className='absolute inset-0 bg-black/50 backdrop-blur-sm' onClick={handleClose}></div>
+            <div className='absolute inset-0 bg-black/50 backdrop-blur-sm'></div>
 
             <div className='relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden z-10'>
                 {/* Header */}
-                <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-red-50 to-orange-50 border-red-100'>
+                <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 border-primary-100'>
                     <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center'>
+                            <AlertTriangle className='text-white' size={20} />
+                        </div>
                         <div>
-                            <h2 className='text-xl font-bold text-gray-900'>Từ chối nhận hàng</h2>
+                            <h2 className='text-2xl font-bold text-gray-900'>Từ chối nhận hàng</h2>
                             <p className='text-sm text-gray-600'>Ngày: {formatDate(workDate)}</p>
                         </div>
                     </div>
                     <button
                         onClick={handleClose}
-                        className='p-2 hover:bg-white/50 rounded-full transition-colors'
+                        className='text-gray-400 hover:text-red-500 text-3xl font-light cursor-pointer'
+                        aria-label='Đóng'
                         disabled={loading}
                     >
-                        <X size={24} className='text-gray-600' />
+                        <X size={28} />
                     </button>
                 </div>
 
@@ -155,7 +159,7 @@ const RejectAssignmentModal: React.FC<RejectAssignmentModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className='flex items-center justify-end gap-3 p-6 border-t bg-gray-50'>
+                <div className='flex items-center justify-end gap-3 p-5 border-t border-primary-100 bg-white'>
                     <button
                         onClick={() => {
                             // compose reason from tags

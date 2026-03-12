@@ -62,6 +62,12 @@ export const getProductById = async (id: string): Promise<Product> => {
     return response.data;
 };
 
+// Undo receive at warehouse for a product
+export const undoReceiveAtWarehouse = async (qrCode: string): Promise<any> => {
+    const response = await axios.put(`/products/undo-receive-at-warehouse/${qrCode}`);
+    return response.data;
+};
+
 // Update points transaction for a product
 export const updatePointsTransaction = async (
     productId: string,

@@ -30,10 +30,7 @@ const AssignRecyclingShow: React.FC<AssignedRecyclingShowProps> = ({
             </td>
             <td className='py-3 px-4 text-gray-700 w-48'>
                 {company.companyEmail || 'Chưa có email'}
-            </td>
-            <td className='py-3 px-4 text-gray-700 w-36'>
-                {company.phone || 'Chưa có SĐT'}
-            </td>
+            </td>   
             <td className='py-3 px-4 text-gray-700 w-60'>
                 {company.city || 'Chưa có địa chỉ'}
             </td>

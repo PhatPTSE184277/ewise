@@ -5,7 +5,7 @@ import Toast from '@/components/ui/Toast';
 import CustomNumberInput from '@/components/ui/CustomNumberInput';
 import CustomTextarea from '@/components/ui/CustomTextarea';
 import { X, Package as PackageIcon, ArrowRight, Check } from 'lucide-react';
-import { getProductByQRCode, getProductById, updatePointsTransaction } from '@/services/small-collector/IWProductService';
+import { getProductByQRCode, getProductById, updatePointsTransaction, undoReceiveAtWarehouse } from '@/services/small-collector/IWProductService';
 
 interface ReceiveProductProps {
     open: boolean;
@@ -57,6 +57,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
     const [zoomImg, setZoomImg] = useState<string | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [updatedProductIds, setUpdatedProductIds] = useState<string[]>([]);
+    const [undoingProductIds, setUndoingProductIds] = useState<string[]>([]);
 
     const qrInputRef = useRef<HTMLInputElement>(null);
 
@@ -231,6 +232,20 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
         setPoint(0);
     };
 
+    const handleUndoProduct = async (product: ScannedProduct) => {
+        setUndoingProductIds((prev) => [...prev, product.productId]);
+        try {
+            await undoReceiveAtWarehouse(product.qrCode);
+            setScannedProducts((prev) => prev.filter((p) => p.productId !== product.productId));
+            setUpdatedProductIds((prev) => prev.filter((id) => id !== product.productId));
+            if (latestQr === product.qrCode) setLatestQr(null);
+        } catch (err: any) {
+            showToast(err?.message || 'Hoàn tác thất bại!', 'error');
+        } finally {
+            setUndoingProductIds((prev) => prev.filter((id) => id !== product.productId));
+        }
+    };
+
     const handleClose = () => {
         setQrCode('');
         setScannedProducts([]);
@@ -240,6 +255,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
         setPoint(0);
         setShowEditModal(false);
         setUpdatedProductIds([]);
+        setUndoingProductIds([]);
         onClose();
     };
 
@@ -329,7 +345,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                     Sản phẩm đã quét: {scannedProducts.length}
                                 </h3>
                                 <div className='flex flex-wrap gap-2'>
-                                    {scannedProducts.map((product) => {
+                                    {scannedProducts.slice(-8).map((product) => {
                                         const isLatest = product.qrCode === latestQr;
                                         const isUpdated = updatedProductIds.includes(product.productId);
                                         const baseClass = isLatest
@@ -338,17 +354,30 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                                 ? 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200'
                                                 : 'bg-primary-100 hover:bg-primary-200 text-primary-700 border-primary-300';
                                         const isLoadingTab = loadingTabId === product.productId;
+                                        const isUndoing = undoingProductIds.includes(product.productId);
                                         return (
-                                            <button
-                                                key={product.qrCode}
-                                                onClick={() => !isLoadingTab && handleTabClick(product)}
-                                                disabled={isLoadingTab}
-                                                className={`px-4 py-2 rounded-lg font-medium transition cursor-pointer text-sm border ${baseClass} flex items-center gap-2 disabled:opacity-70 disabled:cursor-wait`}
-                                            >
-                                                {isLoadingTab
-                                                    ? <><span className='w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin' /><span>{product.qrCode}</span></>
-                                                    : <><span>{product.qrCode}</span>{isUpdated ? <Check size={14} /> : null}</>}
-                                            </button>
+                                            <div key={product.qrCode} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border ${baseClass} mr-2 mb-2`}>
+                                                <button
+                                                    onClick={() => !isLoadingTab && !isUndoing && handleTabClick(product)}
+                                                    disabled={isLoadingTab || isUndoing}
+                                                    className='flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-wait cursor-pointer'
+                                                >
+                                                    {isLoadingTab
+                                                        ? <><span className='w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin' /><span>{product.qrCode}</span></>
+                                                        : <><span>{product.qrCode}</span>{isUpdated ? <Check size={13} /> : null}</>}
+                                                </button>
+
+                                                <button
+                                                    onClick={() => !isUndoing && !isLoadingTab && handleUndoProduct(product)}
+                                                    disabled={isUndoing || isLoadingTab}
+                                                    title='Hoàn tác nhận hàng'
+                                                    className='opacity-60 hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-wait'
+                                                >
+                                                    {isUndoing
+                                                        ? <span className='w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block' />
+                                                        : <X size={13} />}
+                                                </button>
+                                            </div>
                                         );
                                     })}
                                 </div>
