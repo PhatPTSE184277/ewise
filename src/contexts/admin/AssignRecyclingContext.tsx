@@ -15,7 +15,7 @@ import {
     getScpAssignmentDetail as fetchScpAssignmentDetail,
     getRecyclingCompanies
 } from '@/services/admin/AssignRecyclingService';
-import { getCollectionCompanies } from '@/services/admin/CollectionCompanyService';
+import { getCollectionCompanies } from '@/services/admin/CompanyService';
 
 interface AssignRecyclingContextType {
     recyclingCompanies: any[];

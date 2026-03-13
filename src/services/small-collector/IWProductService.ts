@@ -26,21 +26,16 @@ export const filterIncomingWarehouseProducts = async ({
     return response.data;
 };
 
+export interface ReceiveWarehouseItem {
+    qrCode: string;
+    point: number | null;
+    description: string | null;
+}
+
 export const receiveProductAtWarehouse = async (
-    qrCode: string,
-    productId?: string,
-    description?: string | null,
-    point?: number
+    items: ReceiveWarehouseItem[]
 ): Promise<any> => {
-    const body: Record<string, any> = {
-        description: description === null ? null : (description || ''),
-        point: point || 0
-    };
-    if (productId) body.productId = productId;
-    const response = await axios.put(
-        `/products/receive-at-warehouse/${qrCode}`,
-        body
-    );
+    const response = await axios.put('/products/receive-at-warehouse', items);
     return response.data;
 };
 

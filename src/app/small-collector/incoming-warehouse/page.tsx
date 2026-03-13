@@ -7,7 +7,7 @@ import IWProductList from '@/components/small-collector/incoming-warehouse/IWPro
 
 import ProductDetail from '@/components/small-collector/incoming-warehouse/modal/ProductDetail';
 import CreateProduct from '@/components/small-collector/incoming-warehouse/modal/CreateProduct';
-import ReceiveProduct from '@/components/small-collector/incoming-warehouse/modal/ReceiveProduct';
+import ReceiveProduct from '../../../components/small-collector/incoming-warehouse/modal/ReceiveProduct';
 import CustomDateRangePicker from '@/components/ui/CustomDateRangePicker';
 import SearchBox from '@/components/ui/SearchBox';
 import Pagination from '@/components/ui/Pagination';
@@ -101,16 +101,10 @@ const IncomingWarehousePage: React.FC = () => {
 
     const handleReceive = async (data: {
         qrCode: string;
-        productId: string;
+        point: number | null;
         description: string | null;
-        point: number;
-    }) => {
-        await receiveProduct(
-            data.qrCode,
-            data.productId,
-            data.description,
-            data.point
-        );
+    }[]) => {
+        await receiveProduct(data);
         // Fetch lại danh sách sản phẩm sau khi nhận hàng
         await fetchProducts(fromDate, toDate);
     };
@@ -222,8 +216,9 @@ const IncomingWarehousePage: React.FC = () => {
                 <ReceiveProduct
                     open={showReceiveModal}
                     onClose={() => setShowReceiveModal(false)}
-                    onConfirm={async (data) => {
+                    onConfirm={async (data: { qrCode: string; point: number | null; description: string | null }[]) => {
                         await handleReceive(data);
+                        setShowReceiveModal(false);
                     }}
                 />
             )}

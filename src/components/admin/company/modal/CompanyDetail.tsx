@@ -8,7 +8,7 @@ import {
     getSmallCollectionsFilter,
     approveCollectionPoint,
     blockCollectionPoint,
-} from '@/services/admin/CollectionCompanyService';
+} from '@/services/admin/CompanyService';
 import { SmallCollectionPoint } from '@/types';
 import CollectionPointApprove from './CollectionPointApprove';
 import CollectionPointBlock from './CollectionPointBlock';

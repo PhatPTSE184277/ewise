@@ -38,9 +38,9 @@ export const adminMenuItems = [
         icon: <Recycle size={20} />
     },
     {
-        id: 'collection-company',
-        label: 'Công ty thu gom',
-        path: '/admin/collection-company',
+        id: 'company',
+        label: 'Công ty',
+        path: '/admin/company',
         icon: <Factory size={20} />
     },
     {

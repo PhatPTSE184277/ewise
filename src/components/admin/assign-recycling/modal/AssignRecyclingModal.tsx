@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { X } from 'lucide-react';
-import { getCollectionCompanies } from '@/services/admin/CollectionCompanyService';
+import { getCollectionCompanies } from '@/services/admin/CompanyService';
 import { getScpAssignmentDetail, getRecyclingCompanies } from '@/services/admin/AssignRecyclingService';
 import AssignRecyclingPointList from './AssignRecyclingPointList';
 import RecyclingCompanySelectModal from './RecyclingSelectModal';

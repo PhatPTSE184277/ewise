@@ -3,15 +3,15 @@
 import React, { useState } from 'react';
 import { Factory } from 'lucide-react';
 import { IoCloudUploadOutline } from 'react-icons/io5';
-import { useCollectionCompanyContext } from '@/contexts/admin/CollectionCompanyContext';
-import CompanyList from '@/components/admin/collection-company/CompanyList';
-import CompanyDetail from '@/components/admin/collection-company/modal/CompanyDetail';
-import ImportExcelModal from '@/components/admin/collection-company/modal/ImportComapnyModal';
+import { useCompanyContext } from '@/contexts/admin/CompanyContext';
+import CompanyList from '@/components/admin/company/CompanyList';
+import CompanyDetail from '@/components/admin/company/modal/CompanyDetail';
+import ImportExcelModal from '@/components/admin/company/modal/ImportComapnyModal';
 import Pagination from '@/components/ui/Pagination';
-import CompanyFilter from '@/components/admin/collection-company/CompanyFilter';
+import CompanyFilter from '@/components/admin/company/CompanyFilter';
 import { useAuth } from '@/hooks/useAuth';
 
-const CollectionCompanyPage: React.FC = () => {
+const CompanyPage: React.FC = () => {
     const { user } = useAuth();
     const {
         companies,
@@ -22,9 +22,11 @@ const CollectionCompanyPage: React.FC = () => {
         setPage,
         fetchCompanies,
         fetchCompanyById,
+        type,
+        setType,
         status,
         setStatus
-    } = useCollectionCompanyContext();
+    } = useCompanyContext();
 
     const [selectedCompany, setSelectedCompany] = useState<any>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -33,23 +35,31 @@ const CollectionCompanyPage: React.FC = () => {
 
     // Khi vào trang, mặc định filter là 'Đang hoạt động'
     React.useEffect(() => {
-        setStatus('DANG_HOAT_DONG');
+        setType('Công ty thu gom');
+        setStatus('Đang hoạt động');
         setPage(1);
-        fetchCompanies(1, undefined, 'DANG_HOAT_DONG');
+        fetchCompanies(1, undefined, 'Công ty thu gom', 'Đang hoạt động');
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Xử lý chuyển trang
     const handlePageChange = (newPage: number) => {
         setPage(newPage);
-        fetchCompanies(newPage, undefined, status);
+        fetchCompanies(newPage, undefined, type, status);
+    };
+
+    // Xử lý filter type
+    const handleTypeChange = (newType: string) => {
+        setType(newType);
+        setPage(1);
+        fetchCompanies(1, undefined, newType, status);
     };
 
     // Xử lý filter status
     const handleStatusChange = (newStatus: string) => {
         setStatus(newStatus);
         setPage(1);
-        fetchCompanies(1, undefined, newStatus);
+        fetchCompanies(1, undefined, type, newStatus);
     };
 
     const handleViewDetail = async (company: any) => {
@@ -83,10 +93,34 @@ const CollectionCompanyPage: React.FC = () => {
                         <Factory className='text-white' size={20} />
                     </div>
                     <h1 className='text-3xl font-bold text-gray-900'>
-                        {user?.role === 'Collector' ? 'Thông tin công ty' : 'Quản lý công ty thu gom'}
+                        {user?.role === 'Collector' ? 'Thông tin công ty' : 'Quản lý công ty'}
                     </h1>
                 </div>
                 <div className='flex gap-4 items-center flex-1 justify-end'>
+                    <div className='flex items-center gap-2 mr-4'>
+                        <span className='text-xs text-gray-500 font-semibold mr-2 hidden sm:inline'>Loại:</span>
+                        <button
+                            onClick={() => handleTypeChange('Công ty thu gom')}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer min-w-[120px] ${
+                                type === 'Công ty thu gom'
+                                    ? 'bg-primary-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            Công ty thu gom
+                        </button>
+                        <button
+                            onClick={() => handleTypeChange('Công ty tái chế')}
+                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer min-w-[120px] ${
+                                type === 'Công ty tái chế'
+                                    ? 'bg-primary-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            Công ty tái chế
+                        </button>
+                    </div>
+
                     {user?.role !== 'Collector' && (
                         <button
                             type='button'
@@ -102,7 +136,10 @@ const CollectionCompanyPage: React.FC = () => {
             </div>
 
             {/* Filter trạng thái */}
-            <CompanyFilter status={status} onFilterChange={handleStatusChange} />
+            <CompanyFilter
+                status={status}
+                onStatusChange={handleStatusChange}
+            />
 
 
             {/* Danh sách công ty */}
@@ -139,4 +176,4 @@ const CollectionCompanyPage: React.FC = () => {
     );
 };
 
-export default CollectionCompanyPage;
+export default CompanyPage;

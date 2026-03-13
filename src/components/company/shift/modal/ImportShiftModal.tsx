@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileText } from 'lucide-react';
+import { X, FileText, Download } from 'lucide-react';
 
 interface ImportShiftModalProps {
     open: boolean;
@@ -99,7 +99,15 @@ const ImportShiftModal: React.FC<ImportShiftModalProps> = ({ open, onClose, onIm
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end items-center gap-3 p-5 border-t border-primary-100 bg-white">
+                <div className="flex justify-between items-center gap-3 p-5 border-t border-primary-100 bg-white">
+                    <a
+                        href="/templates/company.xlsx"
+                        download
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-primary-300 text-primary-600 hover:bg-primary-50 transition text-sm font-medium"
+                    >
+                        <Download size={16} />
+                        Tải file mẫu
+                    </a>
                     <button
                         onClick={handleImport}
                         disabled={uploading}

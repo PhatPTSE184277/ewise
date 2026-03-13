@@ -12,6 +12,7 @@ import type { Product, CreateProductPayload } from '@/types/Product';
 import {
     filterIncomingWarehouseProducts,
     receiveProductAtWarehouse,
+    ReceiveWarehouseItem,
     getProductByQRCode,
     createIncomingWarehouseProduct,
     getProductById
@@ -34,12 +35,7 @@ interface IWProductContextType {
     selectedProduct: Product | null;
     setSelectedProduct: (product: Product | null) => void;
     fetchProducts: (fromDate?: string, toDate?: string) => Promise<void>;
-    receiveProduct: (
-        qrCode: string,
-        productId?: string,
-        description?: string | null,
-        point?: number
-    ) => Promise<void>;
+    receiveProduct: (items: ReceiveWarehouseItem[]) => Promise<void>;
     getProductByQRCode: (qrCode: string) => Promise<Product | null>;
     createProduct: (payload: CreateProductPayload) => Promise<void>;
     filter: ProductFilter;
@@ -238,20 +234,10 @@ export const IWProductProvider: React.FC<Props> = ({ children }) => {
     );
 
     const receiveProduct = useCallback(
-        async (
-            qrCode: string,
-            productId?: string,
-            description?: string | null,
-            point?: number
-        ) => {
+        async (items: ReceiveWarehouseItem[]) => {
             setLoading(true);
             try {
-                await receiveProductAtWarehouse(
-                    qrCode,
-                    productId,
-                    description,
-                    point
-                );
+                await receiveProductAtWarehouse(items);
                 await fetchProducts();
             } catch (err: any) {
                 console.error('receiveProduct error', err);

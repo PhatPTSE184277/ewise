@@ -2,7 +2,7 @@
 import axios from '@/lib/axios';
 import { SmallCollectionPoint } from '@/types';
 
-export type CollectionCompany = {
+export type Company = {
 	id: string;
 	name: string;
 	companyEmail: string;
@@ -22,20 +22,20 @@ export type Warehouse = {
 	companyId: string | null;
 };
 
-export type CollectionCompanyDetail = CollectionCompany & {
+export type CompanyDetail = Company & {
 	warehouses: Warehouse[];
 };
 
-export type PaginatedCollectionCompany = {
+export type PaginatedCompany = {
 	page: number;
 	limit: number;
 	totalItems: number;
 	totalPages: number;
-	data: CollectionCompany[];
+	data: Company[];
 };
 
 // API lấy tất cả công ty (không phân trang) - dùng cho dropdown/select
-export const getCollectionCompanies = async (): Promise<CollectionCompany[]> => {
+export const getCompanies = async (): Promise<Company[]> => {
 	const response = await axios.get('/collection-company');
 	if (response.data.data && Array.isArray(response.data.data)) {
 		return response.data.data;
@@ -44,23 +44,25 @@ export const getCollectionCompanies = async (): Promise<CollectionCompany[]> => 
 };
 
 // API lấy công ty có phân trang và filter
-export const getCollectionCompaniesFilter = async (
+export const getCompaniesFilter = async (
 	page = 1,
 	limit = 10,
+	type?: string,
 	status?: string
-): Promise<PaginatedCollectionCompany> => {
+): Promise<PaginatedCompany> => {
 	const params: any = { page, limit };
+	if (type) params.type = type;
 	if (status) params.status = status;
 	const response = await axios.get('/collection-company/filter', { params });
 	return response.data;
 };
 
-export const getCollectionCompanyById = async (companyId: string): Promise<CollectionCompany> => {
-  const response = await axios.get(`/collection-company/${companyId}`);
-  return response.data;
+export const getCompanyById = async (companyId: string): Promise<Company> => {
+	const response = await axios.get(`/collection-company/${companyId}`);
+	return response.data;
 };
 
-export const importCollectionCompaniesFromExcel = async (file: File): Promise<any> => {
+export const importCompaniesFromExcel = async (file: File): Promise<any> => {
 	const formData = new FormData();
 	formData.append('file', file);
 	const response = await axios.post('/collection-company/import-excel', formData, {
@@ -105,3 +107,12 @@ export const blockCollectionPoint = async (id: string | number): Promise<any> =>
 	const response = await axios.patch(`/management/collection-points/${id}/block`);
 	return response.data;
 };
+
+// Backwards-compatible aliases (do not remove immediately)
+export type CollectionCompany = Company;
+export type CollectionCompanyDetail = CompanyDetail;
+export type PaginatedCollectionCompany = PaginatedCompany;
+export const getCollectionCompanies = getCompanies;
+export const getCollectionCompaniesFilter = getCompaniesFilter;
+export const getCollectionCompanyById = getCompanyById;
+export const importCollectionCompaniesFromExcel = importCompaniesFromExcel;

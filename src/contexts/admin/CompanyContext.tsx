@@ -9,42 +9,44 @@ import React, {
     ReactNode
 } from 'react';
 import {
-    getCollectionCompaniesFilter,
-    getCollectionCompanyById,
-    importCollectionCompaniesFromExcel,
-    CollectionCompany,
-    PaginatedCollectionCompany
-} from '@/services/admin/CollectionCompanyService';
+    getCompaniesFilter,
+    getCompanyById,
+    importCompaniesFromExcel,
+    Company,
+    PaginatedCompany
+} from '@/services/admin/CompanyService';
 import { useAuth } from '@/hooks/useAuth';
 
 // Định nghĩa kiểu context cho công ty thu gom (có phân trang)
-interface CollectionCompanyContextType {
-    companies: CollectionCompany[];
+interface CompanyContextType {
+    companies: Company[];
     loading: boolean;
     error: string | null;
     page: number;
     limit: number;
     totalItems: number;
     totalPages: number;
+    type: string;
     status: string;
-    fetchCompanies: (page?: number, limit?: number, status?: string) => Promise<void>;
-    fetchCompanyById: (id: string | number) => Promise<CollectionCompany | null>;
+    fetchCompanies: (page?: number, limit?: number, type?: string, status?: string) => Promise<void>;
+    fetchCompanyById: (id: string | number) => Promise<Company | null>;
     importFromExcel: (file: File) => Promise<any>;
     clearCompanies: () => void;
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
+    setType: (type: string) => void;
     setStatus: (status: string) => void;
 }
 
-const CollectionCompanyContext = createContext<
-    CollectionCompanyContextType | undefined
+const CompanyContext = createContext<
+    CompanyContextType | undefined
 >(undefined);
 
 type Props = { children: ReactNode };
 
-export const CollectionCompanyProvider: React.FC<Props> = ({ children }) => {
+export const CompanyProvider: React.FC<Props> = ({ children }) => {
     const { user } = useAuth();
-    const [companies, setCompanies] = useState<CollectionCompany[]>([]);
+    const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     // Thêm state cho phân trang
@@ -52,30 +54,34 @@ export const CollectionCompanyProvider: React.FC<Props> = ({ children }) => {
     const [limit, setLimit] = useState<number>(10);
     const [totalItems, setTotalItems] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(1);
+    const [type, setType] = useState<string>('');
     const [status, setStatus] = useState<string>('');
 
     // Dùng ref để tránh fetchCompanies phụ thuộc vào state, ngăn re-render không cần thiết
     const pageRef = useRef(page);
     const limitRef = useRef(limit);
+    const typeRef = useRef(type);
     const statusRef = useRef(status);
     const userRef = useRef(user);
 
     // Đồng bộ ref với state
     pageRef.current = page;
     limitRef.current = limit;
+    typeRef.current = type;
     statusRef.current = status;
     userRef.current = user;
 
     // Hàm lấy danh sách công ty thu gom có phân trang và filter
-    const fetchCompanies = useCallback(async (customPage?: number, customLimit?: number, customStatus?: string) => {
+    const fetchCompanies = useCallback(async (customPage?: number, customLimit?: number, customType?: string, customStatus?: string) => {
         setLoading(true);
         setError(null);
         try {
             const currentPage = customPage ?? pageRef.current;
             const currentLimit = customLimit ?? limitRef.current;
+            const currentType = customType ?? typeRef.current;
             const currentStatus = customStatus ?? statusRef.current;
             const currentUser = userRef.current;
-            const data: PaginatedCollectionCompany = await getCollectionCompaniesFilter(currentPage, currentLimit, currentStatus || undefined);
+            const data: PaginatedCompany = await getCompaniesFilter(currentPage, currentLimit, currentType || undefined, currentStatus || undefined);
 
             // Nếu là Collector, chỉ lấy công ty của mình
             if (currentUser?.role === 'Collector' && currentUser?.collectionCompanyId) {
@@ -92,11 +98,12 @@ export const CollectionCompanyProvider: React.FC<Props> = ({ children }) => {
             }
             setPage(currentPage);
             setLimit(currentLimit);
+            if (customType !== undefined) setType(customType);
             if (customStatus !== undefined) setStatus(customStatus);
         } catch (err: any) {
             setError(
                 err?.response?.data?.message ||
-                    'Lỗi khi tải danh sách công ty thu gom'
+                    'Lỗi khi tải danh sách công ty'
             );
             setCompanies([]);
             setTotalItems(0);
@@ -111,7 +118,7 @@ export const CollectionCompanyProvider: React.FC<Props> = ({ children }) => {
         // Dùng loading riêng để không ảnh hưởng đến loading của danh sách
         setError(null);
         try {
-            const data = await getCollectionCompanyById(String(id));
+            const data = await getCompanyById(String(id));
             return data;
         } catch (err: any) {
             setError(
@@ -126,7 +133,7 @@ export const CollectionCompanyProvider: React.FC<Props> = ({ children }) => {
             setLoading(true);
             setError(null);
             try {
-                const res = await importCollectionCompaniesFromExcel(file);
+                const res = await importCompaniesFromExcel(file);
                 await fetchCompanies();
                 return res;
             } catch (err: any) {
@@ -145,7 +152,7 @@ export const CollectionCompanyProvider: React.FC<Props> = ({ children }) => {
     }, []);
 
     // Giá trị context trả về
-    const value: CollectionCompanyContextType = {
+    const value: CompanyContextType = {
         companies,
         loading,
         error,
@@ -153,6 +160,7 @@ export const CollectionCompanyProvider: React.FC<Props> = ({ children }) => {
         limit,
         totalItems,
         totalPages,
+        type,
         status,
         fetchCompanies,
         fetchCompanyById,
@@ -160,21 +168,27 @@ export const CollectionCompanyProvider: React.FC<Props> = ({ children }) => {
         clearCompanies,
         setPage,
         setLimit,
+        setType,
         setStatus
     };
 
     return (
-        <CollectionCompanyContext.Provider value={value}>
+        <CompanyContext.Provider value={value}>
             {children}
-        </CollectionCompanyContext.Provider>
+        </CompanyContext.Provider>
     );
 };
 
-export const useCollectionCompanyContext = (): CollectionCompanyContextType => {
-    const ctx = useContext(CollectionCompanyContext);
+export const useCompanyContext = (): CompanyContextType => {
+    const ctx = useContext(CompanyContext);
     if (!ctx)
         throw new Error(
-            'useCollectionCompanyContext must be used within CollectionCompanyProvider'
+            'useCompanyContext must be used within CompanyProvider'
         );
     return ctx;
 };
+
+// Backwards-compatible aliases (do not remove immediately)
+export const useCollectionCompanyContext = useCompanyContext;
+export const CollectionCompanyProvider = CompanyProvider;
+export type CollectionCompanyContextType = CompanyContextType;

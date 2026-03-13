@@ -1,49 +1,45 @@
 /* eslint-disable @next/next/no-img-element */
- 'use client';
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import Toast from '@/components/ui/Toast';
 import CustomNumberInput from '@/components/ui/CustomNumberInput';
 import CustomTextarea from '@/components/ui/CustomTextarea';
-import { X, Package as PackageIcon, ArrowRight, Check } from 'lucide-react';
-import { getProductByQRCode, getProductById, updatePointsTransaction, undoReceiveAtWarehouse } from '@/services/small-collector/IWProductService';
+import { X, Package as PackageIcon, ArrowRight } from 'lucide-react';
+import { getProductByQRCode, getProductById } from '@/services/small-collector/IWProductService';
+import ReceiveProductList, { ReceiveScannedProduct } from './ReceiveProductList';
 
 interface ReceiveProductProps {
     open: boolean;
     onClose: () => void;
     onConfirm: (data: {
         qrCode: string;
-        productId: string;
         description: string | null;
-        point: number;
-    }) => void;
-    // When true, do not call onConfirm (no PUT) and show a toast marking the scan only
-    skipPutOnScan?: boolean;
+        point: number | null;
+    }[]) => void;
 }
 
-interface ScannedProduct {
-    productId: string;
-    categoryName: string;
-    brandName: string;
-    description: string;
-    qrCode: string;
+interface ScannedProduct extends ReceiveScannedProduct {
     status: string;
+    estimatePoint?: number;
     realPoints?: number;
+    realPoint?: number | null;
     productImages?: string[];
     changedPointMessage?: string;
+    pendingDescription?: string;
 }
 
 const REASON_TAGS = [
-    "Sản phẩm bị hỏng",
-    "Thiếu linh kiện",
-    "Chất lượng không như mô tả",
-    "Khác"
+    'Sản phẩm bị hỏng',
+    'Thiếu linh kiện',
+    'Chất lượng không như mô tả',
+    'Khác'
 ];
 
 const ReceiveProduct: React.FC<ReceiveProductProps> = ({
     open,
     onClose,
-    onConfirm,
-    skipPutOnScan,
+    onConfirm
 }) => {
     const [qrCode, setQrCode] = useState('');
     const [scannedProducts, setScannedProducts] = useState<ScannedProduct[]>([]);
@@ -51,37 +47,35 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
     const [selectedProduct, setSelectedProduct] = useState<ScannedProduct | null>(null);
     const [loading, setLoading] = useState(false);
     const [loadingTabId, setLoadingTabId] = useState<string | null>(null);
+
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [customReason, setCustomReason] = useState('');
     const [point, setPoint] = useState(0);
     const [zoomImg, setZoomImg] = useState<string | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
+
     const [updatedProductIds, setUpdatedProductIds] = useState<string[]>([]);
-    const [undoingProductIds, setUndoingProductIds] = useState<string[]>([]);
+    const [confirmingReceive, setConfirmingReceive] = useState(false);
 
     const qrInputRef = useRef<HTMLInputElement>(null);
 
-    // Toast state for scan-only feedback
     const [toastOpen, setToastOpen] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
-    // Helper to show toast and immediately refocus the QR input
     const showToast = (message: string, type: 'success' | 'error' = 'success') => {
         setToastMessage(message);
         setToastType(type);
         setToastOpen(true);
-        // ensure input gets focus immediately and after layout updates
         try {
             qrInputRef.current?.focus();
             requestAnimationFrame(() => qrInputRef.current?.focus());
             setTimeout(() => qrInputRef.current?.focus(), 50);
-        } catch (e) {
-            console.log(e)
+        } catch {
+            // no-op
         }
     };
 
-    // Ensure the QR input is focused after each successful scan (unless edit modal is open)
     useEffect(() => {
         if (!showEditModal) {
             setTimeout(() => qrInputRef.current?.focus(), 50);
@@ -90,40 +84,48 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
 
     useEffect(() => {
         if (open) {
-            // Reset form when modal opens
             setQrCode('');
             setScannedProducts([]);
-                setLatestQr(null);
+            setLatestQr(null);
             setSelectedProduct(null);
             setSelectedTags([]);
             setCustomReason('');
             setPoint(0);
             setShowEditModal(false);
             setUpdatedProductIds([]);
-            // Auto focus on QR input
+            setConfirmingReceive(false);
             setTimeout(() => qrInputRef.current?.focus(), 100);
         }
     }, [open]);
 
+    const getBasePoint = (product: any) => {
+        const real = product?.realPoints ?? product?.realPoint;
+        const estimate = product?.estimatePoint;
+        return Number(real ?? estimate ?? 0);
+    };
+
     const handleScanQR = async (e: React.FormEvent) => {
         e.preventDefault();
         const code = qrCode.trim();
-        if (!code) {
-            return;
-        }
+        if (!code) return;
+
         setLoading(true);
         try {
-            const product = await getProductByQRCode(code);
-            // Check if product status is valid for receiving
-            const normalizedStatus = product.status?.toLowerCase() || '';
-            if (
-                !normalizedStatus.includes('đã thu') &&
-                normalizedStatus !== 'collected'
-            ) {
-                showToast('Sản phẩm đã được nhân rồi!', 'error');
+            if (scannedProducts.some((p) => p.qrCode === code)) {
+                showToast('Mã này đã có trong danh sách quét!', 'error');
                 setQrCode('');
                 return;
             }
+
+            const product = await getProductByQRCode(code);
+            const normalizedStatus = product.status?.toLowerCase() || '';
+            if (!normalizedStatus.includes('đã thu') && normalizedStatus !== 'collected') {
+                showToast('Sản phẩm chưa ở trạng thái đã thu gom!', 'error');
+                setQrCode('');
+                return;
+            }
+
+            const basePoint = getBasePoint(product);
             const newProduct: ScannedProduct = {
                 productId: product.productId,
                 categoryName: product.categoryName,
@@ -131,28 +133,20 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                 description: product.description,
                 qrCode: product.qrCode,
                 status: product.status,
+                estimatePoint: product.estimatePoint,
                 realPoints: product.realPoints,
+                realPoint: product.realPoint,
+                originalPoint: basePoint,
+                pendingPoint: undefined,
+                pendingDescription: undefined,
                 productImages: product.productImages,
                 changedPointMessage: product.changedPointMessage
             };
-            setScannedProducts((prev) => [...prev, newProduct]);
+
+            setScannedProducts((prev) => [newProduct, ...prev]);
             setLatestQr(newProduct.qrCode);
-            if (skipPutOnScan) {
-            } else {
-                try {
-                    onConfirm({
-                        qrCode: newProduct.qrCode,
-                        productId: newProduct.productId,
-                        description: null,
-                        point: newProduct.realPoints || 0,
-                    });
-                } catch (err: any) {
-                    console.error('onConfirm handler error', err);
-                    showToast(err?.message || 'Lỗi khi nhận hàng', 'error');
-                }
-            }
             setQrCode('');
-            setTimeout(() => { qrInputRef.current?.focus(); }, 0);
+            setTimeout(() => qrInputRef.current?.focus(), 0);
         } catch (err: any) {
             console.error('Scan QR error', err);
             showToast(err?.message || 'Không tìm thấy sản phẩm với mã này!', 'error');
@@ -162,69 +156,106 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
         }
     };
 
-    const handleTabClick = async (product: ScannedProduct) => {
+    const handleEditProduct = async (product: ScannedProduct) => {
         setLoadingTabId(product.productId);
         try {
             const fresh = await getProductById(product.productId);
+            const freshBasePoint = getBasePoint(fresh);
             const merged: ScannedProduct = {
                 ...product,
-                realPoints: fresh.realPoints ?? product.realPoints,
-                changedPointMessage: fresh.changedPointMessage ?? product.changedPointMessage,
+                categoryName: fresh.categoryName ?? product.categoryName,
+                brandName: fresh.brandName ?? product.brandName,
                 description: fresh.description ?? product.description,
+                estimatePoint: fresh.estimatePoint ?? product.estimatePoint,
+                realPoints: fresh.realPoints ?? product.realPoints,
+                realPoint: (fresh as any).realPoint ?? product.realPoint,
+                originalPoint: freshBasePoint,
                 productImages: fresh.productImages ?? product.productImages,
+                changedPointMessage: fresh.changedPointMessage ?? product.changedPointMessage,
             };
-            // update cached list so next open is also fresh
+
             setScannedProducts((prev) =>
                 prev.map((p) => (p.productId === product.productId ? merged : p))
             );
+
             setSelectedProduct(merged);
-            setPoint(merged.realPoints || 0);
+            setPoint(merged.pendingPoint ?? merged.originalPoint);
         } catch {
-            // fallback to cached data on error
             setSelectedProduct(product);
-            setPoint(product.realPoints || 0);
+            setPoint(product.pendingPoint ?? product.originalPoint);
         } finally {
             setLoadingTabId(null);
         }
-        setSelectedTags([]);
-        setCustomReason('');
+
+        const descToRestore = product.pendingDescription;
+        if (descToRestore) {
+            const parts = descToRestore.split('; ');
+            const knownTags = REASON_TAGS.filter((t) => t !== 'Khác');
+            const savedTags: string[] = [];
+            const customParts: string[] = [];
+            for (const part of parts) {
+                if (knownTags.includes(part)) {
+                    savedTags.push(part);
+                } else {
+                    customParts.push(part);
+                    if (!savedTags.includes('Khác')) savedTags.push('Khác');
+                }
+            }
+            setSelectedTags(savedTags);
+            setCustomReason(customParts.join('; '));
+        } else {
+            setSelectedTags([]);
+            setCustomReason('');
+        }
         setShowEditModal(true);
     };
 
-    const handleSubmit = async () => {
+    const handleSaveEdit = () => {
         if (!selectedProduct) return;
 
-        const isPointChanged = point !== (selectedProduct.realPoints || 0);
+        const isPointChanged = point !== selectedProduct.originalPoint;
+
         if (isPointChanged) {
-            const reasons = selectedTags.filter(t => t !== "Khác");
-            if (selectedTags.includes("Khác")) {
-                if (customReason.trim()) reasons.push(customReason.trim());
+            const reasons = selectedTags.filter((t) => t !== 'Khác');
+            if (selectedTags.includes('Khác') && customReason.trim()) {
+                reasons.push(customReason.trim());
             }
             if (reasons.length === 0) return;
 
-            try {
-                await updatePointsTransaction(
-                    selectedProduct.productId,
-                    point,
-                    reasons.join("; ")
-                );
-                // update local list so UI reflects new point
-                setScannedProducts((prev) =>
-                    prev.map((p) =>
-                        p.qrCode === selectedProduct.qrCode
-                            ? { ...p, realPoints: point }
-                            : p
-                    )
-                );
-                // mark this product as updated so tab can indicate change
-                setUpdatedProductIds((prev) => (prev.includes(selectedProduct.productId) ? prev : [...prev, selectedProduct.productId]));
-            } catch (error) {
-                console.error('Error updating points:', error);
-                return;
-            }
+            setScannedProducts((prev) =>
+                prev.map((p) =>
+                    p.qrCode === selectedProduct.qrCode
+                        ? {
+                            ...p,
+                            pendingPoint: point,
+                            pendingDescription: reasons.join('; ')
+                        }
+                        : p
+                )
+            );
+
+            setUpdatedProductIds((prev) =>
+                prev.includes(selectedProduct.productId)
+                    ? prev
+                    : [...prev, selectedProduct.productId]
+            );
+        } else {
+            setScannedProducts((prev) =>
+                prev.map((p) =>
+                    p.qrCode === selectedProduct.qrCode
+                        ? {
+                            ...p,
+                            pendingPoint: undefined,
+                            pendingDescription: undefined
+                        }
+                        : p
+                )
+            );
+            setUpdatedProductIds((prev) =>
+                prev.filter((id) => id !== selectedProduct.productId)
+            );
         }
 
-        // Close edit modal after possible update
         setShowEditModal(false);
         setSelectedProduct(null);
         setSelectedTags([]);
@@ -232,17 +263,37 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
         setPoint(0);
     };
 
-    const handleUndoProduct = async (product: ScannedProduct) => {
-        setUndoingProductIds((prev) => [...prev, product.productId]);
+    const handleRemoveProduct = (product: ReceiveScannedProduct) => {
+        setScannedProducts((prev) =>
+            prev.filter((p) => p.productId !== product.productId)
+        );
+        setUpdatedProductIds((prev) =>
+            prev.filter((id) => id !== product.productId)
+        );
+        if (latestQr === product.qrCode) setLatestQr(null);
+    };
+
+    const handleConfirmReceive = async () => {
+        if (scannedProducts.length === 0 || confirmingReceive) return;
+
+        const payload = scannedProducts.map((p) => {
+            const changedPoint = p.pendingPoint;
+            const isChanged = changedPoint !== undefined && changedPoint !== p.originalPoint;
+            return {
+                qrCode: p.qrCode,
+                point: isChanged ? changedPoint! : null,
+                description: isChanged ? (p.pendingDescription || '') : null
+            };
+        });
+
+        setConfirmingReceive(true);
         try {
-            await undoReceiveAtWarehouse(product.qrCode);
-            setScannedProducts((prev) => prev.filter((p) => p.productId !== product.productId));
-            setUpdatedProductIds((prev) => prev.filter((id) => id !== product.productId));
-            if (latestQr === product.qrCode) setLatestQr(null);
+            await onConfirm(payload);
         } catch (err: any) {
-            showToast(err?.message || 'Hoàn tác thất bại!', 'error');
+            console.error('confirm receive error', err);
+            showToast(err?.message || 'Xác nhận nhận kho thất bại', 'error');
         } finally {
-            setUndoingProductIds((prev) => prev.filter((id) => id !== product.productId));
+            setConfirmingReceive(false);
         }
     };
 
@@ -255,7 +306,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
         setPoint(0);
         setShowEditModal(false);
         setUpdatedProductIds([]);
-        setUndoingProductIds([]);
+        setConfirmingReceive(false);
         onClose();
     };
 
@@ -269,30 +320,23 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
 
     if (!open) return null;
 
-    // Refocus input after toast closes (for error and success)
-    const handleToastClose = () => {
-        setTimeout(() => { qrInputRef.current?.focus(); }, 0);
-        setToastOpen(false);
-    };
-
     return (
         <>
-            <Toast open={toastOpen} type={toastType} message={toastMessage} onClose={handleToastClose} duration={2500} />
-            {/* Main Modal - Scan QR */}
-            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
-                {/* Overlay */}
-                <div
-                    className='absolute inset-0 bg-black/30 backdrop-blur-sm'
-                ></div>
+            <Toast
+                open={toastOpen}
+                type={toastType}
+                message={toastMessage}
+                onClose={() => setToastOpen(false)}
+                duration={2500}
+            />
 
-                {/* Modal container */}
-                <div className='relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn'>
-                    {/* Header */}
-                    <div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
+            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
+                <div className='absolute inset-0 bg-black/30 backdrop-blur-sm' />
+
+                <div className='relative w-full max-w-7xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn'>
+                    <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 border-primary-100'>
                         <div>
-                            <h2 className='text-2xl font-bold text-gray-900'>
-                                Nhận hàng từ shipper
-                            </h2>
+                            <h2 className='text-2xl font-bold text-gray-900'>Nhận hàng từ shipper</h2>
                             <p className='text-sm text-gray-600 mt-1'>Quét mã sản phẩm để nhận hàng</p>
                         </div>
                         <button
@@ -303,13 +347,10 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                         </button>
                     </div>
 
-                    {/* Body */}
-                    <div className='flex-1 overflow-y-auto p-6 space-y-4 bg-white'>
-                        {/* Mã sản phẩm input */}
-                        <div>
+                    <div className='flex-1 p-6 space-y-6 bg-gray-50 overflow-y-auto'>
+                        <div className='bg-white rounded-xl p-4 shadow-sm border border-primary-100'>
                             <label className='block text-sm font-medium text-gray-700 mb-2'>
-                                Mã sản phẩm{' '}
-                                <span className='text-red-500'>*</span>
+                                Mã sản phẩm <span className='text-red-500'>*</span>
                             </label>
                             <form onSubmit={handleScanQR} className='flex gap-2'>
                                 <div className='relative flex-1'>
@@ -318,7 +359,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                         type='text'
                                         value={qrCode}
                                         onChange={(e) => setQrCode(e.target.value)}
-                                        placeholder='Nhập mã sản phẩm...'
+                                        placeholder='Quét hoặc nhập mã QR...'
                                         disabled={loading}
                                         className='w-full pl-10 pr-4 py-2 border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400 disabled:bg-gray-100'
                                         autoComplete='off'
@@ -331,62 +372,38 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                 <button
                                     type='submit'
                                     disabled={loading}
-                                    className='px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer'
+                                    className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer'
                                 >
                                     {loading ? 'Đang tìm...' : <ArrowRight className='w-5 h-5' />}
                                 </button>
                             </form>
                         </div>
 
-                        {/* Tabs hiện các sản phẩm đã quét */}
-                        {scannedProducts.length > 0 && (
-                            <div className='bg-white rounded-xl p-4 shadow-sm border border-primary-200'>
-                                <h3 className='text-sm font-semibold text-gray-700 mb-3'>
-                                    Sản phẩm đã quét: {scannedProducts.length}
-                                </h3>
-                                <div className='flex flex-wrap gap-2'>
-                                    {scannedProducts.slice(-8).map((product) => {
-                                        const isLatest = product.qrCode === latestQr;
-                                        const isUpdated = updatedProductIds.includes(product.productId);
-                                        const baseClass = isLatest
-                                            ? 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200'
-                                            : isUpdated
-                                                ? 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200'
-                                                : 'bg-primary-100 hover:bg-primary-200 text-primary-700 border-primary-300';
-                                        const isLoadingTab = loadingTabId === product.productId;
-                                        const isUndoing = undoingProductIds.includes(product.productId);
-                                        return (
-                                            <div key={product.qrCode} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border ${baseClass} mr-2 mb-2`}>
-                                                <button
-                                                    onClick={() => !isLoadingTab && !isUndoing && handleTabClick(product)}
-                                                    disabled={isLoadingTab || isUndoing}
-                                                    className='flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-wait cursor-pointer'
-                                                >
-                                                    {isLoadingTab
-                                                        ? <><span className='w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin' /><span>{product.qrCode}</span></>
-                                                        : <><span>{product.qrCode}</span>{isUpdated ? <Check size={13} /> : null}</>}
-                                                </button>
+                        <ReceiveProductList
+                            products={scannedProducts}
+                            loadingTabId={loadingTabId}
+                            latestQr={latestQr}
+                            updatedProductIds={updatedProductIds}
+                            onEdit={(product) => handleEditProduct(product as ScannedProduct)}
+                            onRemove={handleRemoveProduct}
+                            maxHeight={34}
+                        />
+                    </div>
 
-                                                <button
-                                                    onClick={() => !isUndoing && !isLoadingTab && handleUndoProduct(product)}
-                                                    disabled={isUndoing || isLoadingTab}
-                                                    title='Hoàn tác nhận hàng'
-                                                    className='opacity-60 hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-wait'
-                                                >
-                                                    {isUndoing
-                                                        ? <span className='w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block' />
-                                                        : <X size={13} />}
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
+                    <div className='flex justify-between items-center p-6 border-t border-primary-100 bg-white'>
+                        <span className='text-gray-700 text-base'>
+                            {scannedProducts.length} sản phẩm đã thêm
+                        </span>
+                        <button
+                            onClick={handleConfirmReceive}
+                            disabled={confirmingReceive || scannedProducts.length === 0}
+                            className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer shadow-md'
+                        >
+                            {confirmingReceive ? 'Đang xác nhận...' : 'Xác nhận nhận kho'}
+                        </button>
                     </div>
                 </div>
 
-                {/* Animation */}
                 <style jsx>{`
                     @keyframes fadeIn {
                         from {
@@ -404,22 +421,14 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                 `}</style>
             </div>
 
-            {/* Edit Modal - Hiện khi click vào tab */}
             {showEditModal && selectedProduct && (
                 <div className='fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4'>
-                    {/* Overlay */}
-                    <div
-                        className='absolute inset-0 bg-black/30 backdrop-blur-sm'
-                    ></div>
+                    <div className='absolute inset-0 bg-black/30 backdrop-blur-sm'></div>
 
-                    {/* Modal container */}
-                    <div className='relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn'>
-                        {/* Header */}
+                    <div className='relative w-full max-w-6xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn'>
                         <div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
                             <div>
-                                <h2 className='text-2xl font-bold text-gray-900'>
-                                    Chi tiết sản phẩm
-                                </h2>
+                                <h2 className='text-2xl font-bold text-gray-900'>Chi tiết sản phẩm</h2>
                                 <p className='text-sm text-gray-600 mt-1'>Xác nhận và cập nhật điểm sản phẩm</p>
                             </div>
                             <button
@@ -430,9 +439,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                             </button>
                         </div>
 
-                        {/* Body */}
                         <div className='flex-1 overflow-y-auto p-6 space-y-4 bg-white'>
-                            {/* Scanned Product Info */}
                             <div className='bg-white rounded-xl p-4 shadow-sm border border-primary-200'>
                                 <div className='flex items-center gap-2 mb-3'>
                                     <PackageIcon className='text-primary-600' size={20} />
@@ -480,25 +487,25 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                                 <span className='text-base font-medium text-gray-900 flex-1 break-all'>{selectedProduct.brandName}</span>
                                             </div>
                                             <div className='flex items-center w-1/2'>
-                                                <span className='text-sm text-gray-500 w-24 block'>Điểm:</span>
+                                                <span className='text-sm text-gray-500 w-28 block'>Điểm</span>
                                                 <CustomNumberInput
                                                     value={point}
                                                     onChange={setPoint}
                                                     min={0}
-                                                    className='w-24 px-2 py-1 border border-primary-300 rounded-lg text-primary-700 font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent'
+                                                    className='w-28 px-2 py-1 border border-primary-300 rounded-lg text-primary-700 font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent'
                                                 />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                {/* Ghi chú sản phẩm */}
+
                                 {selectedProduct.description && (
                                     <div className='mt-3 pt-3 border-t border-gray-100'>
                                         <span className='text-sm text-gray-500'>Ghi chú:</span>
                                         <span className='ml-2 text-gray-700 text-sm'>{selectedProduct.description}</span>
                                     </div>
                                 )}
-                                {/* Ghi chú điểm (if present) */}
+
                                 {selectedProduct.changedPointMessage && (
                                     <div className='mt-3 pt-3 border-t border-gray-100'>
                                         <span className='text-sm text-gray-500'>Ghi chú điểm:</span>
@@ -507,8 +514,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                 )}
                             </div>
 
-                            {/* Textarea lý do đổi điểm - chỉ hiện khi admin sửa điểm */}
-                            {point !== (selectedProduct.realPoints || 0) && (
+                            {point !== selectedProduct.originalPoint && (
                                 <div className='bg-white rounded-xl p-4 shadow-sm border border-primary-200'>
                                     <label className='block text-sm font-medium text-gray-700 mb-2'>
                                         Lý do đổi điểm <span className='text-red-500'>*</span>
@@ -520,11 +526,14 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                                 <button
                                                     type='button'
                                                     key={tag}
-                                                    className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors cursor-pointer
-                                                        ${isSelected ? 'bg-primary-100 border-primary-500 text-primary-700' : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-primary-50'}`}
+                                                    className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors cursor-pointer ${
+                                                        isSelected
+                                                            ? 'bg-primary-100 border-primary-500 text-primary-700'
+                                                            : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-primary-50'
+                                                    }`}
                                                     onClick={() => {
                                                         if (isSelected) {
-                                                            setSelectedTags(selectedTags.filter(t => t !== tag));
+                                                            setSelectedTags(selectedTags.filter((t) => t !== tag));
                                                         } else {
                                                             setSelectedTags([...selectedTags, tag]);
                                                         }
@@ -535,6 +544,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                             );
                                         })}
                                     </div>
+
                                     <div className='flex gap-2 mb-2'>
                                         {(() => {
                                             const tag = REASON_TAGS[3];
@@ -543,11 +553,14 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                                 <button
                                                     type='button'
                                                     key={tag}
-                                                    className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors cursor-pointer
-                                                        ${isSelected ? 'bg-primary-100 border-primary-500 text-primary-700' : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-primary-50'}`}
+                                                    className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors cursor-pointer ${
+                                                        isSelected
+                                                            ? 'bg-primary-100 border-primary-500 text-primary-700'
+                                                            : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-primary-50'
+                                                    }`}
                                                     onClick={() => {
                                                         if (isSelected) {
-                                                            setSelectedTags(selectedTags.filter(t => t !== tag));
+                                                            setSelectedTags(selectedTags.filter((t) => t !== tag));
                                                             setCustomReason('');
                                                         } else {
                                                             setSelectedTags([...selectedTags, tag]);
@@ -559,6 +572,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                             );
                                         })()}
                                     </div>
+
                                     {selectedTags.includes('Khác') && (
                                         <CustomTextarea
                                             value={customReason}
@@ -571,17 +585,20 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                             )}
                         </div>
 
-                        {/* Footer */}
-                        <div className='flex justify-between items-center gap-3 p-5 border-t border-primary-100 bg-white'>
-                            <div className='flex justify-end w-full gap-3'>
-                                <button
-                                    onClick={handleSubmit}
-                                    disabled={loading || (point !== (selectedProduct?.realPoints || 0) && (selectedTags.length === 0 || (selectedTags.includes('Khác') && selectedTags.length === 1 && !customReason.trim())))}
-                                    className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer'
-                                >
-                                    Xác nhận
-                                </button>
-                            </div>
+                        <div className='flex justify-end items-center gap-3 p-5 border-t border-primary-100 bg-white'>
+                            <button
+                                onClick={handleSaveEdit}
+                                disabled={
+                                    point !== selectedProduct.originalPoint &&
+                                    (selectedTags.length === 0 ||
+                                        (selectedTags.includes('Khác') &&
+                                            selectedTags.length === 1 &&
+                                            !customReason.trim()))
+                                }
+                                className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer'
+                            >
+                                Xác nhận
+                            </button>
                         </div>
                     </div>
                 </div>

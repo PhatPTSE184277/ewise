@@ -7,7 +7,7 @@ import { useSmallCollectionContext } from '@/contexts/company/SmallCollectionCon
 import SmallCollectionList from '@/components/company/small-collection/SmallCollectionList';
 import SmallCollectionDetail from '@/components/company/small-collection/modal/SmallCollectionDetail';
 import SearchBox from '@/components/ui/SearchBox';
-import ImportExcelModal from '@/components/admin/collection-company/modal/ImportComapnyModal';
+import ImportExcelModal from '@/components/admin/company/modal/ImportComapnyModal';
 import SmallCollectionFilter from '@/components/company/small-collection/SmallCollectionFilter';
 import { SmallCollectionPoint } from '@/types';
 import { useAuth } from '@/hooks/useAuth';

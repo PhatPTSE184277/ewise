@@ -7,7 +7,7 @@ import ProductList from './ProductList';
 import Pagination from '@/components/ui/Pagination';
 import UnassignedProductsModal from './modal/UnassignedProductsModal';
 import { formatDate } from '@/utils/FormatDate';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
 interface AssignDayStepProps {
     loading: boolean;
@@ -220,7 +220,7 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
                                     className={`px-4 py-2 bg-primary-600 text-white rounded-lg transition cursor-pointer shadow-md font-medium ${loading || createDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-primary-700'}`}
                                     disabled={loading || createDisabled}
                                 >
-                                    {loading || createDisabled ? 'Đang phân chia...' : `Phân chia (${previewVehicles.length} xe)`}
+                                    {loading || createDisabled ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Đồng ý'}
                                 </button>
                             </div>
                         </div>

@@ -6,7 +6,7 @@ import Sidebar from '@/components/ui/Sidebar';
 import Toast from '@/components/ui/Toast';
 import { adminMenuItems } from '@/constants/admin/MenuItem';
 import { UserProvider } from '@/contexts/admin/UserContext';
-import { CollectionCompanyProvider } from '@/contexts/admin/CollectionCompanyContext';
+import { CollectionCompanyProvider } from '@/contexts/admin/CompanyContext';
 import { RequestProvider } from '@/contexts/admin/RequestContext';
 import { SystemConfigProvider } from '@/contexts/admin/SystemConfigContext';
 import { TrackingProvider } from '@/contexts/admin/TrackingContext';
