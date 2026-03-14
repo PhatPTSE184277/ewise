@@ -43,13 +43,13 @@ const CompanySelectList: React.FC<CompanySelectListProps> = ({
                 <div className='text-gray-700 line-clamp-2'>{company.city || 'N/A'}</div>
             </td>
             <td className='py-3 px-4 text-right w-[12vw]'>
-                <span className='text-gray-700 font-medium'>{formatWeightKg(company.maxCapacity ?? 0)}</span>
+                <span className='text-gray-700 font-medium'>{formatWeightKg(company.availableCapacity ?? 0)}</span>
             </td>
             {/* <td className='py-3 px-4 text-right w-[12vw]'>
                 <span className='text-gray-700 font-medium'>{formatWeightKg(company.currentCapacity ?? 0)}</span>
             </td> */}
             <td className='py-3 px-4 text-right w-[12vw]'>
-                <span className='text-gray-700 font-medium'>{formatWeightKg(company.availableCapacity ?? 0)}</span>
+                <span className='text-gray-700 font-medium'>{formatWeightKg(company.maxCapacity ?? 0)}</span>
             </td>
         </tr>
     );

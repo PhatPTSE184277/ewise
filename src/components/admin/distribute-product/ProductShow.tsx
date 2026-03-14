@@ -37,8 +37,8 @@ const ProductShow: React.FC<ProductShowProps> = ({
                     />
                 </td>
             )}
-            <td className='py-3 px-4 text-center w-[6vw]'>
-                <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto'>
+            <td className='py-3 px-4 text-center w-[5vw]'>
+                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
                     {stt}
                 </span>
             </td>

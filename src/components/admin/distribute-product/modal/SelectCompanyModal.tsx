@@ -96,9 +96,9 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                                                     <th className='py-3 px-4 text-center w-[5vw]'>STT</th>
                                                     <th className='py-3 px-4 text-left w-[18vw]'>Công ty</th>
                                                     <th className='py-3 px-4 text-left w-[14vw]'>Địa chỉ</th>
-                                                    <th className='py-3 px-4 text-right w-[12vw]'>Sức chứa tối đa (m³)</th>
-                                                    {/* <th className='py-3 px-4 text-right w-[12vw]'>Đang chứa (m³)</th> */}
                                                     <th className='py-3 px-4 text-right w-[12vw]'>Còn trống (m³)</th>
+                                                    {/* <th className='py-3 px-4 text-right w-[12vw]'>Đang chứa (m³)</th> */}
+                                                    <th className='py-3 px-4 text-right w-[12vw]'>Sức chứa tối đa (m³)</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -117,9 +117,6 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                                                             </td>
                                                             <td className='py-3 px-4'>
                                                                 <div className='h-4 bg-gray-200 rounded w-32 animate-pulse' />
-                                                            </td>
-                                                            <td className='py-3 px-4'>
-                                                                <div className='h-4 bg-gray-200 rounded w-20 animate-pulse ml-auto' />
                                                             </td>
                                                             <td className='py-3 px-4'>
                                                                 <div className='h-4 bg-gray-200 rounded w-20 animate-pulse ml-auto' />

@@ -53,7 +53,7 @@ const ProductList: React.FC<ProductListProps> = ({
                                                 />
                                             </th>
                                         )}
-                                        <th className='py-3 px-4 text-center w-[6vw]'>STT</th>
+                                        <th className='py-3 px-4 text-center w-[5vw]'>STT</th>
                                         <th className='py-3 px-4 text-left w-[15vw]'>Danh mục - Thương hiệu</th>
                                         <th className='py-3 px-4 text-left w-[20vw]'>Địa chỉ</th>
                                     </tr>
@@ -67,7 +67,7 @@ const ProductList: React.FC<ProductListProps> = ({
                                                         <div className='h-4 w-4 bg-gray-200 rounded animate-pulse mx-auto' />
                                                     </td>
                                                 )}
-                                                <td className='py-3 px-4 text-center w-[6vw]'>
+                                                <td className='py-3 px-4 text-center w-[5vw]'>
                                                     <div className='h-7 w-7 bg-gray-200 rounded-full animate-pulse mx-auto' />
                                                 </td>
                                                 <td className='py-3 px-4 w-[15vw]'>
