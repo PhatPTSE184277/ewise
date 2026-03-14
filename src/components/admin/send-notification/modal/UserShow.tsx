@@ -1,6 +1,7 @@
 import React from 'react';
 import { User } from '@/services/admin/SendNotiService';
 import { formatDate } from '@/utils/FormatDate';
+import { formatNumber } from '@/utils/formatNumber';
 // removed masking per request
 
 interface UserShowProps {
@@ -12,14 +13,15 @@ interface UserShowProps {
     hideRole?: boolean;
 }
 
-const UserShow: React.FC<UserShowProps> = ({
+const UserShow: React.FC<UserShowProps & { rowIndex?: number }> = ({
     user,
     stt,
     isLast = false,
     isSelected,
-    onToggleSelect
+    onToggleSelect,
+    rowIndex = 0
 }) => {
-    const rowBgClass = isSelected ? 'bg-primary-50' : (stt - 1) % 2 === 0 ? 'bg-white' : 'bg-primary-50';
+    const rowBgClass = rowIndex % 2 === 0 ? 'bg-white' : 'bg-primary-50';
 
     return (
         <tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBgClass}`}> 
@@ -28,12 +30,12 @@ const UserShow: React.FC<UserShowProps> = ({
                     type='checkbox'
                     checked={isSelected}
                     onChange={() => onToggleSelect(user.userId)}
-                    className='w-4 h-4 text-primary-600 bg-white rounded focus:ring-2 focus:ring-primary-500 cursor-pointer'
+                    className='w-4 h-4 cursor-pointer accent-primary-600'
                 />
             </td>
             <td className='py-3 px-4 text-center w-16'>
-                <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto'>
-                    {stt}
+                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+                    {formatNumber(stt)}
                 </span>
             </td>
             <td className='py-3 px-4 font-medium text-gray-900 w-52'>

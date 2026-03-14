@@ -35,7 +35,7 @@ const UserList: React.FC<UserListProps> = ({
 
     useEffect(() => {
         if (selectAllRef.current) {
-            selectAllRef.current.indeterminate = someSelected;
+            selectAllRef.current.indeterminate = false;
         }
     }, [someSelected]);
 
@@ -56,7 +56,7 @@ const UserList: React.FC<UserListProps> = ({
                                                 onChange={() =>
                                                     onToggleSelectAll()
                                                 }
-                                                className='w-4 h-4 text-primary-600 bg-white rounded focus:ring-2 focus:ring-primary-500 cursor-pointer'
+                                                className='w-4 h-4 cursor-pointer accent-primary-600'
                                             />
                                         </th>
                                         <th className='py-3 px-4 text-center w-16'>
@@ -100,6 +100,7 @@ const UserList: React.FC<UserListProps> = ({
                                                     user.userId
                                                 )}
                                                 onToggleSelect={onToggleSelect}
+                                                rowIndex={idx}
                                             />
                                         ))
                                     ) : (
