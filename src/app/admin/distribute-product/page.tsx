@@ -448,19 +448,7 @@ const DistributeProductPage: React.FC = () => {
                         Chia sản phẩm
                     </h1>
                 </div>
-                <div className='flex gap-4 items-center flex-1 justify-end'>
-                    {activeFilter === 'distributed' && (selectedCompany || selectedSCP) && (
-                        <Breadcrumb
-                            items={[
-                                { label: 'Danh sách công ty', onClick: handleBackToFilter },
-                                ...(selectedCompany ? [{ 
-                                    label: selectedCompany.companyName, 
-                                    onClick: selectedSCP ? handleBackToCompanies : undefined 
-                                }] : []),
-                                ...(selectedSCP ? [{ label: selectedSCP.pointName }] : [])
-                            ]}
-                        />
-                    )}
+                <div className='flex gap-4 items-center'>
                     <div className='min-w-fit'>
                         <CustomDatePicker
                             value={selectedDate}
@@ -478,6 +466,24 @@ const DistributeProductPage: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {activeFilter === 'distributed' && (selectedCompany || selectedSCP) && (
+                <div className='mb-3 w-full overflow-x-auto'>
+                    <div className='min-w-max'>
+                        <Breadcrumb
+                            items={[
+                                { label: 'Danh sách công ty', onClick: handleBackToFilter },
+                                ...(selectedCompany ? [{
+                                    label: selectedCompany.companyName,
+                                    onClick: selectedSCP ? handleBackToCompanies : undefined
+                                }] : []),
+                                ...(selectedSCP ? [{ label: selectedSCP.pointName }] : [])
+                            ]}
+                        />
+                    </div>
+                </div>
+            )}
+
             {/* Filter Buttons */}
             <DistributeProductFilter 
                 activeFilter={activeFilter}
@@ -538,6 +544,7 @@ const DistributeProductPage: React.FC = () => {
                         scpName={selectedSCP.pointName}
                         page={scpPage}
                         itemsPerPage={pageSize}
+                        scrollHeightClassName='max-h-[46vh] sm:max-h-[58vh] md:max-h-[50vh] lg:max-h-[42vh] xl:max-h-[46vh]'
                     />
                     <Pagination
                         page={scpPage}

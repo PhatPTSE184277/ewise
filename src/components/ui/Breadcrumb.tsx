@@ -21,7 +21,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
                     {item.onClick ? (
                         <button
                             onClick={item.onClick}
-                            className='text-primary-600 hover:text-primary-800 font-medium transition-colors'
+                            className='text-primary-600 hover:text-primary-800 font-medium transition-colors cursor-pointer'
                         >
                             {item.label}
                         </button>
