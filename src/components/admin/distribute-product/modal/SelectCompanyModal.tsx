@@ -83,7 +83,7 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                                 <div className='overflow-hidden'>
                                     <div className='max-h-[50vh] overflow-y-auto'>
                                         <table className='w-full text-sm text-gray-800 table-fixed'>
-                                            <thead className='bg-gray-50 text-gray-700 uppercase text-xs font-semibold sticky top-0 z-10'>
+                                            <thead className='bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-200'>
                                                 <tr>
                                                     <th className='py-3 px-4 text-center w-16'>
                                                         <input

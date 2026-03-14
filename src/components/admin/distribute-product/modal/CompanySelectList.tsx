@@ -17,8 +17,8 @@ const CompanySelectList: React.FC<CompanySelectListProps> = ({
     isLast = false
 }) => {
     return (
-        <tr 
-            className={`${!isLast ? 'border-b border-primary-100' : ''} ${isSelected ? 'bg-primary-50' : ''} hover:bg-primary-50/40 transition-colors cursor-pointer`}
+        <tr
+            className={`${!isLast ? 'border-b border-primary-100' : ''} ${isSelected ? 'bg-primary-50' : ''} odd:bg-white even:bg-primary-50 cursor-pointer`}
             onClick={onToggleSelect}
         >
             <td className='py-3 px-4 text-center w-16'>
