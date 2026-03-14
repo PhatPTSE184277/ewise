@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Factory } from 'lucide-react';
+import { Factory, Download } from 'lucide-react';
 import { IoCloudUploadOutline } from 'react-icons/io5';
 import { useCompanyContext } from '@/contexts/admin/CompanyContext';
 import CompanyList from '@/components/admin/company/CompanyList';
@@ -11,6 +11,8 @@ import Pagination from '@/components/ui/Pagination';
 import CompanyFilter from '@/components/admin/company/CompanyFilter';
 import { useAuth } from '@/hooks/useAuth';
 import Toast from '@/components/ui/Toast';
+import { getActiveSystemConfigs } from '@/services/admin/SystemConfigService';
+import { pickExcelTemplateUrl } from '@/utils/excelTemplateConfig';
 
 const CompanyPage: React.FC = () => {
     const { user } = useAuth();
@@ -32,6 +34,7 @@ const CompanyPage: React.FC = () => {
     const [selectedCompany, setSelectedCompany] = useState<any>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [templateUrl, setTemplateUrl] = useState<string | null>(null);
     const [toast, setToast] = useState<{ open: boolean; type: 'error'; message: string }>({
         open: false,
         type: 'error',
@@ -46,6 +49,19 @@ const CompanyPage: React.FC = () => {
         setPage(1);
         fetchCompanies(1, undefined, 'Công ty thu gom', 'Đang hoạt động');
         // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    React.useEffect(() => {
+        const loadTemplate = async () => {
+            try {
+                const configs = await getActiveSystemConfigs('Excel');
+                setTemplateUrl(pickExcelTemplateUrl(configs, ['cong ty', 'company']));
+            } catch {
+                setTemplateUrl(null);
+            }
+        };
+
+        void loadTemplate();
     }, []);
 
     // Xử lý chuyển trang
@@ -155,14 +171,31 @@ const CompanyPage: React.FC = () => {
                     </div>
 
                     {user?.role !== 'Collector' && (
-                        <button
-                            type='button'
-                            className='flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium shadow-md border border-primary-200 cursor-pointer'
-                            onClick={() => setShowImportModal(true)}
-                        >
-                            <IoCloudUploadOutline size={20} />
-                            Import từ Excel
-                        </button>
+                        <>
+                            <a
+                                href={templateUrl || '#'}
+                                download
+                                onClick={(e) => {
+                                    if (!templateUrl) e.preventDefault();
+                                }}
+                                className={`flex items-center gap-2 px-6 py-2.5 rounded-lg border transition font-medium shadow-sm ${
+                                    templateUrl
+                                        ? 'border-primary-300 text-primary-600 hover:bg-primary-50'
+                                        : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                                }`}
+                            >
+                                <Download size={20} />
+                                Tải file mẫu
+                            </a>
+                            <button
+                                type='button'
+                                className='flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium shadow-md border border-primary-200 cursor-pointer'
+                                onClick={() => setShowImportModal(true)}
+                            >
+                                <IoCloudUploadOutline size={20} />
+                                Import từ Excel
+                            </button>
+                        </>
                     )}
                     {/* Bỏ ô tìm kiếm */}
                 </div>

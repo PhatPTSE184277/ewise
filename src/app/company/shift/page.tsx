@@ -8,10 +8,12 @@ import ShiftDetail from '@/components/company/shift/modal/ShiftDetail';
 import ShiftFilter, { ShiftStatus } from '@/components/company/shift/ShiftFilter';
 import SearchBox from '@/components/ui/SearchBox';
 import CustomDateRangePicker from '@/components/ui/CustomDateRangePicker';
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock, Download } from 'lucide-react';
 import ImportShiftModal from '@/components/company/shift/modal/ImportShiftModal';
 import { useAuth } from '@/hooks/useAuth';
 import Toast from '@/components/ui/Toast';
+import { getActiveSystemConfigs } from '@/services/admin/SystemConfigService';
+import { pickExcelTemplateUrl } from '@/utils/excelTemplateConfig';
 
 const ShiftPage: React.FC = () => {
     const { user } = useAuth();
@@ -21,6 +23,7 @@ const ShiftPage: React.FC = () => {
     const [search, setSearch] = useState('');
     const [showImportModal, setShowImportModal] = useState(false);
     const [filterStatus, setFilterStatus] = useState<ShiftStatus>('active');
+    const [templateUrl, setTemplateUrl] = useState<string | null>(null);
     const [toast, setToast] = useState<{ open: boolean; type: 'error'; message: string }>({
         open: false,
         type: 'error',
@@ -58,6 +61,19 @@ const ShiftPage: React.FC = () => {
             });
         }
     }, [fetchShifts, companyId, fromDate, toDate, filterStatus]);
+
+    useEffect(() => {
+        const loadTemplate = async () => {
+            try {
+                const configs = await getActiveSystemConfigs('Excel');
+                setTemplateUrl(pickExcelTemplateUrl(configs, ['ca lam', 'shift']));
+            } catch {
+                setTemplateUrl(null);
+            }
+        };
+
+        void loadTemplate();
+    }, []);
 
     const handleViewDetail = (shift: any) => {
         setSelectedShift(shift);
@@ -152,6 +168,21 @@ const ShiftPage: React.FC = () => {
                 </div>
 
                 <div className='flex gap-3 w-full sm:w-auto justify-end'>
+                    <a
+                        href={templateUrl || '#'}
+                        download
+                        onClick={(e) => {
+                            if (!templateUrl) e.preventDefault();
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition font-medium shadow-sm whitespace-nowrap ${
+                            templateUrl
+                                ? 'border-primary-300 text-primary-600 hover:bg-primary-50'
+                                : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                    >
+                        <Download size={18} />
+                        Tải file mẫu
+                    </a>
                     <button
                         type='button'
                         className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium shadow-md border border-primary-200 cursor-pointer whitespace-nowrap'

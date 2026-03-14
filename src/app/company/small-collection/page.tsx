@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { IoCloudUploadOutline } from 'react-icons/io5';
-import { MapPin } from 'lucide-react';
+import { MapPin, Download } from 'lucide-react';
 import { useSmallCollectionContext } from '@/contexts/company/SmallCollectionContext';
 import SmallCollectionList from '@/components/company/small-collection/SmallCollectionList';
 import SmallCollectionDetail from '@/components/company/small-collection/modal/SmallCollectionDetail';
@@ -12,6 +12,8 @@ import SmallCollectionFilter from '@/components/company/small-collection/SmallCo
 import { SmallCollectionPoint } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import Toast from '@/components/ui/Toast';
+import { getActiveSystemConfigs } from '@/services/admin/SystemConfigService';
+import { pickExcelTemplateUrl } from '@/utils/excelTemplateConfig';
 
 const SmallCollectionPage: React.FC = () => {
     const { user } = useAuth();
@@ -29,6 +31,7 @@ const SmallCollectionPage: React.FC = () => {
     const [search, setSearch] = useState('');
     const [showImportModal, setShowImportModal] = useState(false);
     const [filterStatus, setFilterStatus] = useState('active');
+    const [templateUrl, setTemplateUrl] = useState<string | null>(null);
     const [toast, setToast] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({
         open: false,
         type: 'success',
@@ -42,6 +45,21 @@ const SmallCollectionPage: React.FC = () => {
         // Gọi rõ ràng từ page để tải danh sách (cùng tham số với context)
         fetchSmallCollections({ companyId, page: 1, limit: 10 }).catch(() => {});
     }, [companyId, fetchSmallCollections]);
+
+    useEffect(() => {
+        const loadTemplate = async () => {
+            try {
+                const configs = await getActiveSystemConfigs('Excel');
+                setTemplateUrl(
+                    pickExcelTemplateUrl(configs, ['kho', 'small collection', 'diem thu gom'])
+                );
+            } catch {
+                setTemplateUrl(null);
+            }
+        };
+
+        void loadTemplate();
+    }, []);
     const handleViewDetail = async (point: SmallCollectionPoint) => {
         try {
             const res = await fetchSmallCollectionById(point.id);
@@ -147,6 +165,21 @@ const SmallCollectionPage: React.FC = () => {
                     </h1>
                 </div>
                 <div className='flex gap-4 items-center flex-1 justify-end'>
+                    <a
+                        href={templateUrl || '#'}
+                        download
+                        onClick={(e) => {
+                            if (!templateUrl) e.preventDefault();
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition font-medium shadow-sm ${
+                            templateUrl
+                                ? 'border-primary-300 text-primary-600 hover:bg-primary-50'
+                                : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                    >
+                        <Download size={18} />
+                        Tải file mẫu
+                    </a>
                     <button
                         type='button'
                         className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium shadow-md border border-primary-200 cursor-pointer'

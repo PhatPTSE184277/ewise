@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileText, Download } from 'lucide-react';
-import { getActiveSystemConfigs } from '@/services/admin/SystemConfigService';
-import { pickExcelTemplateUrl } from '@/utils/excelTemplateConfig';
+import { X, FileText } from 'lucide-react';
 
 interface ImportShiftModalProps {
     open: boolean;
@@ -14,22 +12,6 @@ interface ImportShiftModalProps {
 const ImportShiftModal: React.FC<ImportShiftModalProps> = ({ open, onClose, onImport }) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
-    const [templateUrl, setTemplateUrl] = useState<string | null>(null);
-
-    React.useEffect(() => {
-        const loadTemplate = async () => {
-            try {
-                const configs = await getActiveSystemConfigs('Excel');
-                setTemplateUrl(pickExcelTemplateUrl(configs, ['ca lam', 'shift']));
-            } catch {
-                setTemplateUrl(null);
-            }
-        };
-
-        if (open) {
-            void loadTemplate();
-        }
-    }, [open]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -119,22 +101,7 @@ const ImportShiftModal: React.FC<ImportShiftModalProps> = ({ open, onClose, onIm
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-between items-center gap-3 p-5 border-t border-primary-100 bg-white">
-                    <a
-                        href={templateUrl || '#'}
-                        download
-                        onClick={(e) => {
-                            if (!templateUrl) e.preventDefault();
-                        }}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition text-sm font-medium ${
-                            templateUrl
-                                ? 'border-primary-300 text-primary-600 hover:bg-primary-50'
-                                : 'border-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
-                    >
-                        <Download size={16} />
-                        Tải file mẫu
-                    </a>
+                <div className="flex justify-end items-center gap-3 p-5 border-t border-primary-100 bg-white">
                     <button
                         onClick={handleImport}
                         disabled={uploading}

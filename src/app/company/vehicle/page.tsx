@@ -7,10 +7,12 @@ import VehicleDetail from '@/components/company/vehicle/modal/VehicleDetail';
 import ImportVehicleModal from '@/components/company/vehicle/modal/ImportVehicleModal';
 import VehicleFilter, { VehicleStatus } from '@/components/company/vehicle/VehicleFilter';
 import SearchBox from '@/components/ui/SearchBox';
-import { Truck } from 'lucide-react';
+import { Truck, Download } from 'lucide-react';
 import { IoCloudUploadOutline } from 'react-icons/io5';
 import { useAuth } from '@/hooks/useAuth';
 import Toast from '@/components/ui/Toast';
+import { getActiveSystemConfigs } from '@/services/admin/SystemConfigService';
+import { pickExcelTemplateUrl } from '@/utils/excelTemplateConfig';
 
 const VehiclePage: React.FC = () => {
     const { user } = useAuth();
@@ -20,6 +22,7 @@ const VehiclePage: React.FC = () => {
     const [showImportModal, setShowImportModal] = useState(false);
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState<VehicleStatus>('active');
+    const [templateUrl, setTemplateUrl] = useState<string | null>(null);
     const [toast, setToast] = useState<{ open: boolean; type: 'error'; message: string }>({
         open: false,
         type: 'error',
@@ -36,6 +39,19 @@ const VehiclePage: React.FC = () => {
             });
         }
     }, [fetchVehicles, companyId, filterStatus]);
+
+    useEffect(() => {
+        const loadTemplate = async () => {
+            try {
+                const configs = await getActiveSystemConfigs('Excel');
+                setTemplateUrl(pickExcelTemplateUrl(configs, ['phuong tien', 'vehicle']));
+            } catch {
+                setTemplateUrl(null);
+            }
+        };
+
+        void loadTemplate();
+    }, []);
 
     const handleViewDetail = (vehicle: any) => {
         setSelectedVehicle(vehicle);
@@ -110,6 +126,21 @@ const VehiclePage: React.FC = () => {
                     </h1>
                 </div>
                 <div className='flex gap-4 items-center flex-1 justify-end'>
+                    <a
+                        href={templateUrl || '#'}
+                        download
+                        onClick={(e) => {
+                            if (!templateUrl) e.preventDefault();
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition font-medium shadow-sm ${
+                            templateUrl
+                                ? 'border-primary-300 text-primary-600 hover:bg-primary-50'
+                                : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                    >
+                        <Download size={18} />
+                        Tải file mẫu
+                    </a>
                     <button
                         type='button'
                         className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium shadow-md border border-primary-200 cursor-pointer'

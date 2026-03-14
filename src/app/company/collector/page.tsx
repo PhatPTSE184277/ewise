@@ -6,11 +6,13 @@ import { useCollectorContext } from '@/contexts/company/CollectorContext';
 import CollectorList from '@/components/company/collector/CollectorList';
 import CollectorDetail from '@/components/company/collector/modal/CollectorDetail';
 import SearchBox from '@/components/ui/SearchBox';
-import { Users } from 'lucide-react';
+import { Users, Download } from 'lucide-react';
 import ImportCollectorModal from '@/components/company/collector/modal/ImportCollectorModal';
 import { useAuth } from '@/hooks/useAuth';
 import Pagination from '@/components/ui/Pagination';
 import Toast from '@/components/ui/Toast';
+import { getActiveSystemConfigs } from '@/services/admin/SystemConfigService';
+import { pickExcelTemplateUrl } from '@/utils/excelTemplateConfig';
 
 const CollectorPage: React.FC = () => {
     const { user } = useAuth();
@@ -19,6 +21,7 @@ const CollectorPage: React.FC = () => {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [search, setSearch] = useState('');
     const [showImportModal, setShowImportModal] = useState(false);
+    const [templateUrl, setTemplateUrl] = useState<string | null>(null);
     const [toast, setToast] = useState<{ open: boolean; type: 'error'; message: string }>({
         open: false,
         type: 'error',
@@ -32,6 +35,19 @@ const CollectorPage: React.FC = () => {
             fetchCollectors(companyId, page, limit);
         }
     }, [fetchCollectors, companyId, page, limit]);
+
+    useEffect(() => {
+        const loadTemplate = async () => {
+            try {
+                const configs = await getActiveSystemConfigs('Excel');
+                setTemplateUrl(pickExcelTemplateUrl(configs, ['nhan vien', 'collector']));
+            } catch {
+                setTemplateUrl(null);
+            }
+        };
+
+        void loadTemplate();
+    }, []);
 
     const handleViewDetail = (collector: any) => {
         setSelectedCollector(collector);
@@ -104,10 +120,25 @@ const CollectorPage: React.FC = () => {
                         <Users className='text-white' size={20} />
                     </div>
                     <h1 className='text-3xl font-bold text-gray-900'>
-                        Quản lý nhân viên thu gom
+                        Nhân viên thu gom
                     </h1>
                 </div>
                 <div className='flex gap-4 items-center flex-1 justify-end'>
+                    <a
+                        href={templateUrl || '#'}
+                        download
+                        onClick={(e) => {
+                            if (!templateUrl) e.preventDefault();
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition font-medium shadow-sm ${
+                            templateUrl
+                                ? 'border-primary-300 text-primary-600 hover:bg-primary-50'
+                                : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                    >
+                        <Download size={18} />
+                        Tải file mẫu
+                    </a>
                     <button
                         type='button'
                         className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium shadow-md border border-primary-200 cursor-pointer'

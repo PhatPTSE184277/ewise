@@ -11,7 +11,7 @@ export default function Home() {
                 href="/" 
                 profileHref="/profile" 
             />
-            <div className='min-h-screen bg-gray-50 flex items-center justify-center py-20'>
+            <div className='h-[calc(100dvh-3.5rem)] sm:h-[calc(100dvh-4rem)] bg-gray-50 flex items-center justify-center px-4 overflow-hidden'>
                 <div className='max-w-md w-full space-y-8'>
                     <div className='text-center animate-fade-in'>
                         <div className='flex items-center justify-center gap-2'>
