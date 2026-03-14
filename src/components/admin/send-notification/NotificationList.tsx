@@ -16,7 +16,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
             <div className='overflow-x-auto'>
                 <div className='inline-block min-w-full align-middle'>
                     <div className='overflow-hidden'>
-                        <div className='max-h-[70vh] sm:max-h-[70vh] md:max-h-[60vh] lg:max-h-[45vh] xl:max-h-[70vh] overflow-y-auto'>
+                        <div className='max-h-[70vh] sm:max-h-[70vh] md:max-h-[60vh] lg:max-h-[45vh] xl:max-h-[67vh] overflow-y-auto'>
                             <table className='min-w-full text-sm text-gray-800 table-fixed'>
                                 <thead className='bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-200'>
                                     <tr>
