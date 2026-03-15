@@ -35,7 +35,7 @@ const CompanyPage: React.FC = () => {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [templateUrl, setTemplateUrl] = useState<string | null>(null);
-    const [toast, setToast] = useState<{ open: boolean; type: 'error'; message: string }>({
+    const [toast, setToast] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({
         open: false,
         type: 'error',
         message: ''
@@ -103,30 +103,23 @@ const CompanyPage: React.FC = () => {
     const handleImportExcel = async (file: File): Promise<boolean> => {
         try {
             const res = await importFromExcel(file);
-            const isSuccess = Boolean(res?.success);
-            const messages = Array.isArray(res?.messages)
-                ? res.messages.filter((m: unknown): m is string => typeof m === 'string' && m.trim().length > 0)
-                : [];
-
-            if (!isSuccess || messages.length > 0) {
+            if (!res) {
                 setToast({
                     open: true,
                     type: 'error',
-                    message:
-                        messages.length > 0
-                            ? messages.join('\n')
-                            : (res?.message || 'Import thất bại. Vui lòng kiểm tra lại file Excel.')
+                    message: 'Thêm dữ liệu thất bại'
                 });
                 return false;
             }
 
+            setToast({
+                open: true,
+                type: 'success',
+                message: 'Thêm dữ liệu hoàn tất'
+            });
             return true;
-        } catch (error) {
-            const errMessage =
-                typeof error === 'object' && error !== null && 'response' in error
-                    ? ((error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Import thất bại. Vui lòng thử lại.')
-                    : 'Import thất bại. Vui lòng thử lại.';
-            setToast({ open: true, type: 'error', message: errMessage });
+        } catch {
+            setToast({ open: true, type: 'error', message: 'Thêm dữ liệu thất bại' });
             return false;
         }
     };

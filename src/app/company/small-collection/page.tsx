@@ -83,58 +83,25 @@ const SmallCollectionPage: React.FC = () => {
             setToast({
                 open: true,
                 type: 'error',
-                message: 'Không xác định được công ty để import.'
+                message: 'Thêm dữ liệu thất bại'
             });
             return false;
         }
         try {
-            const res = await importSmallCollection(file);
-            const isSuccess = Boolean(res?.success);
-            const messages = Array.isArray(res?.messages)
-                ? res.messages.filter((m: unknown): m is string => typeof m === 'string' && m.trim().length > 0)
-                : [];
-
-            // If API marked overall success but returned messages (warnings/errors per row),
-            // treat as partial failure so user can review/fix the file.
-            if (!isSuccess) {
-                setToast({
-                    open: true,
-                    type: 'error',
-                    message:
-                        messages.length > 0
-                            ? messages.join('\n')
-                            : (res?.message || 'Import thất bại. Vui lòng kiểm tra lại file Excel.')
-                });
-                return false;
-            }
-
-            if (messages.length > 0) {
-                // Partial success: some rows imported, some rows had issues.
-                setToast({
-                    open: true,
-                    type: 'error',
-                    message: messages.join('\n')
-                });
-                // do not close modal — let user fix file and re-import
-                return false;
-            }
-
-            // Fully successful import: close modal silently (no success toast)
+            await importSmallCollection(file);
             await fetchSmallCollections({ companyId, page: 1, limit: 10 });
-            return true;
-        } catch (error) {
-            const errMessage =
-                typeof error === 'object' &&
-                error !== null &&
-                'response' in error &&
-                typeof (error as { response?: { data?: { message?: string } } }).response?.data?.message === 'string'
-                    ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
-                    : 'Import thất bại. Vui lòng thử lại.';
 
             setToast({
                 open: true,
+                type: 'success',
+                message: 'Thêm dữ liệu hoàn tất'
+            });
+            return true;
+        } catch {
+            setToast({
+                open: true,
                 type: 'error',
-                message: errMessage || 'Import thất bại. Vui lòng thử lại.'
+                message: 'Thêm dữ liệu thất bại'
             });
             return false;
         }
