@@ -10,6 +10,7 @@ import { usePackageContext } from '@/contexts/small-collector/PackageContext';
 import { filterPackages, getDeliveryTracking } from '@/services/small-collector/PackageService';
 import { useAuth } from '@/redux';
 import type { PackageType } from '@/types/Package';
+import ConfirmCloseModal from './ConfirmCloseModal';
 
 interface ScanDeliveryQRModalProps {
     open: boolean;
@@ -34,6 +35,25 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
     const [toastType, setToastType] = useState<'success' | 'error'>('error');
 
     const inputRef = useRef<HTMLInputElement>(null);
+
+    // Modal xác nhận đóng
+    const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
+
+    // Đóng modal: nếu đã quét QR mà chưa xác nhận giao hàng thì hỏi xác nhận
+    const handleRequestClose = () => {
+        if (scanned && (!isAlreadyUsed && closedPackages.length > 0)) {
+            setConfirmCloseOpen(true);
+        } else if (scanned && isAlreadyUsed) {
+            setConfirmCloseOpen(true);
+        } else {
+            onClose();
+        }
+    };
+
+    const handleConfirmClose = () => {
+        setConfirmCloseOpen(false);
+        onClose();
+    };
 
     useEffect(() => {
         if (open) {
@@ -140,6 +160,7 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
         onClose();
     };
 
+
     if (!open) return null;
 
     const summaryItems = companyInfo
@@ -150,106 +171,116 @@ const ScanDeliveryQRModal: React.FC<ScanDeliveryQRModalProps> = ({ open, onClose
         : [];
 
     return (
-        <div className='fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4'>
-            <Toast open={toastOpen} type={toastType} message={toastMessage} onClose={() => setToastOpen(false)} />
-            <div className='absolute inset-0 bg-black/30 backdrop-blur-sm' />
+        <>
+            <div className='fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4'>
+                <Toast open={toastOpen} type={toastType} message={toastMessage} onClose={() => setToastOpen(false)} />
+                <div className='absolute inset-0 bg-black/30 backdrop-blur-sm' />
 
-            <div className={`relative w-full ${scanned ? 'max-w-5xl' : 'max-w-3xl'} bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[96vh] animate-fadeIn transition-all duration-300`}>
-                <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 border-primary-100'>
-                    <div className='flex items-center gap-3'>
-                        <div className='w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center'>
-                            <QrCode className='text-white' size={20} />
-                        </div>
-                        <h2 className='text-2xl font-bold text-gray-900'>Quét QR giao hàng</h2>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className='text-gray-400 hover:text-red-500 text-2xl font-light cursor-pointer'
-                        aria-label='Đóng'
-                    >
-                        <X size={24} />
-                    </button>
-                </div>
-
-                <div className='p-6 space-y-6 bg-gray-50 overflow-y-auto'>
-                    {!scanned && (
-                        <form onSubmit={handleScanQR} className='flex gap-3 items-center'>
-                            <div className='relative flex-1'>
-                                <input
-                                    ref={inputRef}
-                                    value={qrCode}
-                                    onChange={(e) => setQrCode(e.target.value)}
-                                    className='w-full pl-10 pr-4 py-3 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300 text-gray-900'
-                                    placeholder='Nhập mã QR công ty...'
-                                    autoComplete='off'
-                                />
-                                <QrCode className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-400' size={18} />
+                <div className={`relative w-full ${scanned ? 'max-w-5xl' : 'max-w-3xl'} bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[96vh] animate-fadeIn transition-all duration-300`}>
+                    <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 border-primary-100'>
+                        <div className='flex items-center gap-3'>
+                            <div className='w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center'>
+                                <QrCode className='text-white' size={20} />
                             </div>
-                            <button
-                                type='submit'
-                                disabled={verifying}
-                                aria-label='Quét'
-                                className='px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium cursor-pointer disabled:opacity-50 flex items-center justify-center'
-                            >
-                                {verifying ? (
-                                    <Loader2 className='animate-spin w-5 h-5' />
-                                ) : (
-                                    <ArrowRight className='w-5 h-5' />
-                                )}
-                            </button>
-                        </form>
-                    )}
-
-                    {/* Hiện thông tin tóm tắt và danh sách chỉ khi quét thành công */}
-                    {scanned && companyInfo && !isAlreadyUsed && (
-                        <SummaryCard items={summaryItems} singleRow={true} label={'Thông tin công ty'} />
-                    )}
-
-                    {scanned && isAlreadyUsed && (
-                        <div className='bg-amber-50 border border-amber-200 rounded-xl p-4'>
-                            <div>
-                                <p className='font-semibold text-amber-800'>QR code đã được sử dụng</p>
-                                <p className='text-sm text-amber-700 mt-0.5'>Danh sách các gói đã được giao bằng mã QR này:</p>
-                            </div>
+                            <h2 className='text-2xl font-bold text-gray-900'>Quét QR giao hàng</h2>
                         </div>
-                    )}
-
-                    {scanned ? (
-                        <PackageList
-                            packages={closedPackages}
-                            loading={loadingPackages}
-                        />
-                    ) : null}
-                </div>
-                {scanned && !isAlreadyUsed ? (
-                    <div className='p-5 border-t border-primary-100 bg-white flex justify-end gap-3'>
                         <button
-                            onClick={handleConfirm}
-                            className='px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium cursor-pointer flex items-center gap-2'
+                            onClick={handleRequestClose}
+                            className='text-gray-400 hover:text-red-500 text-2xl font-light cursor-pointer'
+                            aria-label='Đóng'
                         >
-                            <CheckCircle2 size={18} />
-                            Xác nhận giao hàng
+                            <X size={24} />
                         </button>
                     </div>
-                ) : null}
-            </div>
 
-            <style jsx>{`
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: scale(0.95);
+                    <div className='p-6 space-y-6 bg-gray-50 overflow-y-auto'>
+                        {!scanned && (
+                            <form onSubmit={handleScanQR} className='flex gap-3 items-center'>
+                                <div className='relative flex-1'>
+                                    <input
+                                        ref={inputRef}
+                                        value={qrCode}
+                                        onChange={(e) => setQrCode(e.target.value)}
+                                        className='w-full pl-10 pr-4 py-3 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300 text-gray-900'
+                                        placeholder='Nhập mã QR công ty...'
+                                        autoComplete='off'
+                                    />
+                                    <QrCode className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-400' size={18} />
+                                </div>
+                                <button
+                                    type='submit'
+                                    disabled={verifying}
+                                    aria-label='Quét'
+                                    className='px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium cursor-pointer disabled:opacity-50 flex items-center justify-center'
+                                >
+                                    {verifying ? (
+                                        <Loader2 className='animate-spin w-5 h-5' />
+                                    ) : (
+                                        <ArrowRight className='w-5 h-5' />
+                                    )}
+                                </button>
+                            </form>
+                        )}
+
+                        {/* Hiện thông tin tóm tắt và danh sách chỉ khi quét thành công */}
+                        {scanned && companyInfo && !isAlreadyUsed && (
+                            <SummaryCard items={summaryItems} singleRow={true} label={'Thông tin công ty'} />
+                        )}
+
+                        {scanned && isAlreadyUsed && (
+                            <div className='bg-amber-50 border border-amber-200 rounded-xl p-4'>
+                                <div>
+                                    <p className='font-semibold text-amber-800'>QR code đã được sử dụng</p>
+                                    <p className='text-sm text-amber-700 mt-0.5'>Danh sách các gói đã được giao bằng mã QR này:</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {scanned ? (
+                            <PackageList
+                                packages={closedPackages}
+                                loading={loadingPackages}
+                            />
+                        ) : null}
+                    </div>
+                    {scanned && !isAlreadyUsed ? (
+                        <div className='p-5 border-t border-primary-100 bg-white flex justify-end gap-3'>
+                            <button
+                                onClick={handleConfirm}
+                                className='px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium cursor-pointer flex items-center gap-2'
+                            >
+                                <CheckCircle2 size={18} />
+                                Xác nhận giao hàng
+                            </button>
+                        </div>
+                    ) : null}
+                </div>
+
+                <style jsx>{`
+                    @keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                            transform: scale(0.95);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
                     }
-                    to {
-                        opacity: 1;
-                        transform: scale(1);
+                    .animate-fadeIn {
+                        animation: fadeIn 0.2s ease-out;
                     }
-                }
-                .animate-fadeIn {
-                    animation: fadeIn 0.2s ease-out;
-                }
-            `}</style>
-        </div>
+                `}</style>
+            </div>
+            {/* Modal xác nhận đóng */}
+            <ConfirmCloseModal
+                open={confirmCloseOpen}
+                count={closedPackages.length}
+                isAlreadyUsed={isAlreadyUsed}
+                onConfirm={handleConfirmClose}
+                onClose={() => setConfirmCloseOpen(false)}
+            />
+        </>
     );
 };
 
