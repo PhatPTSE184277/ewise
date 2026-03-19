@@ -47,7 +47,7 @@ const ReceiveProductList: React.FC<ReceiveProductListProps> = ({
                 </h3>
             </div>
 
-            <div className='relative w-full overflow-y-auto border-t border-primary-100' style={{ maxHeight: `${maxHeight}vh` }}>
+            <div className='relative w-full overflow-y-auto' style={{ maxHeight: `${maxHeight}vh` }}>
                 <table className='w-full text-sm text-gray-800 table-fixed'>
                     <thead className='bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-100'>
                         <tr>

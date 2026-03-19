@@ -3,6 +3,7 @@
 import React from 'react';
 import ProductListSkeleton from './ProductListSkeleton';
 import { Trash2, Package } from 'lucide-react';
+import { formatNumber } from '@/utils/formatNumber';
 
 interface ProductListProps {
     products: Array<{
@@ -86,8 +87,8 @@ const ProductList: React.FC<ProductListProps> = ({
                                 style={{ tableLayout: 'fixed' }}
                             >
                                 <td className="py-3 px-4 font-medium text-center">
-                                    <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs flex items-center justify-center font-semibold mx-auto">
-                                        {indexOffset + index + 1}
+                                    <span className="inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2">
+                                        {formatNumber(indexOffset + index + 1)}
                                     </span>
                                 </td>
                                 <td className="py-3 px-4 font-medium text-gray-900">

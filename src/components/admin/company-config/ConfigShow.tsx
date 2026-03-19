@@ -23,7 +23,7 @@ const ConfigShow: React.FC<ConfigShowProps & { isLast?: boolean }> = ({
     return (
         <tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}>
             <td className='py-3 px-4 text-center w-[5vw]'>
-                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-base items-center justify-center font-bold mx-auto shadow-sm px-2'>
+                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
                     {index !== undefined ? formatNumber(index + 1) : ''}
                 </span>
             </td>

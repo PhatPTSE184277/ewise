@@ -1,5 +1,6 @@
 import React from 'react';
 import { Eye } from 'lucide-react';
+import { formatNumber } from '@/utils/formatNumber';
 import { formatTime } from '@/utils/FormatTime';
 import { formatAddress } from '@/utils/FormatAddress';
 import type { CollectionRoute } from '@/types/CollectionRoute';
@@ -19,8 +20,8 @@ const CollectionRouteShow: React.FC<CollectionRouteShowProps & { isLast?: boolea
     return (
         <tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}>
             <td className='py-3 px-2 text-center w-[4vw]'>
-                <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto'>
-                    {stt}
+                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+                    {formatNumber(stt)}
                 </span>
             </td>
             <td className='py-3 px-2 font-medium w-[10vw]'>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatNumber } from '@/utils/formatNumber';
 
 interface DailyStat {
   date: string;
@@ -47,14 +48,14 @@ const PackageList: React.FC<DailyPackageStatsProps> = ({ dailyStats, loading }) 
                 const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-primary-50';
                 return (
                   <tr
-                    key={idx}
-                    className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}
-                  >
-                    <td className='py-3 px-4 font-medium w-16'>
-                      <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-xs flex items-center justify-center font-semibold'>
-                        {idx + 1}
-                      </span>
-                    </td>
+                      key={idx}
+                      className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}
+                    >
+                      <td className='py-3 px-4 font-medium w-16'>
+                        <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+                          {formatNumber(idx + 1)}
+                        </span>
+                      </td>
                     <td className='py-3 px-4 font-medium text-gray-900'>
                       {new Date(stat.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                     </td>

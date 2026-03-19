@@ -57,6 +57,7 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
     const [selectedUnassignedReason, setSelectedUnassignedReason] = useState<string>(
         UNASSIGNED_PRODUCTS_DEFAULT_REASON
     );
+    const [deadlineUnassignedCount, setDeadlineUnassignedCount] = useState(0);
     const itemsPerPage = 10;
     const visibleVehicles = previewVehicles.slice(0, 8);
 
@@ -70,6 +71,17 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
         setUnassignedPage(1);
         fetchUnassignedProducts(workDate, 1, 10, selectedUnassignedReason);
     }, [workDate, fetchUnassignedProducts, selectedUnassignedReason]);
+
+    // Keep the latest total for deadline reason to show in close confirmation.
+    useEffect(() => {
+        if (selectedUnassignedReason === UNASSIGNED_PRODUCTS_DEFAULT_REASON) {
+            setDeadlineUnassignedCount(unassignedProductsData?.total || 0);
+        }
+    }, [selectedUnassignedReason, unassignedProductsData]);
+
+    useEffect(() => {
+        setDeadlineUnassignedCount(0);
+    }, [workDate]);
 
     // Fetch total unassigned count (all reasons) for outer badge
     useEffect(() => {
@@ -303,6 +315,7 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
                 reasonOptions={UNASSIGNED_PRODUCTS_REASON_OPTIONS}
                 selectedReason={selectedUnassignedReason}
                 onReasonChange={handleUnassignedReasonChange}
+                deadlineUnassignedCount={deadlineUnassignedCount}
             />
 
             <VehicleQuickSelectModal

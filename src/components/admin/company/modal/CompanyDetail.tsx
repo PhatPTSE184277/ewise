@@ -57,7 +57,7 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onClose }) => {
     useEffect(() => {
         if (!company?.id) return;
         loadPoints(company.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     }, [company?.id]);
 
     const handleApprove = async () => {

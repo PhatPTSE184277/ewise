@@ -5,6 +5,7 @@ import { X, ScanLine, Plus } from 'lucide-react';
 import { getProductByQRCode } from '@/services/small-collector/IWProductService';
 import ProductList from './ProductList';
 import Toast from '@/components/ui/Toast';
+import ConfirmDeleteModal from '../../incoming-warehouse/modal/ConfirmDeleteModal';
 
 interface CreatePackageProps {
     open: boolean;
@@ -38,6 +39,8 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
     const [toastOpen, setToastOpen] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error'>('error');
+    const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
+    const [qrToRemove, setQrToRemove] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     // const packageNameRef = useRef<HTMLInputElement>(null);
     const lastProductRef = useRef<HTMLTableRowElement>(null);
@@ -63,6 +66,8 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
             setPackageId('');
             setQrCodeInput('');
             setScannedProducts([]);
+            setShowClearAllConfirm(false);
+            setQrToRemove(null);
             // Auto focus on QR input
             setTimeout(() => inputRef.current?.focus(), 100);
         }
@@ -137,13 +142,23 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
         }
     };
 
-    const handleRemoveProduct = (qrCode: string) => {
+    const removeProductFromList = (qrCode: string) => {
         setScannedProducts((prev) => prev.filter((p) => p.qrCode !== qrCode));
         setNewlyAdded((s) => {
             const copy = new Set(s);
             copy.delete(qrCode);
             return copy;
         });
+    };
+
+    const handleRequestRemoveProduct = (qrCode: string) => {
+        setQrToRemove(qrCode);
+    };
+
+    const handleConfirmRemoveProduct = () => {
+        if (!qrToRemove) return;
+        removeProductFromList(qrToRemove);
+        setQrToRemove(null);
     };
 
     const handleSubmit = () => {
@@ -176,7 +191,17 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
         setPackageId('');
         setQrCodeInput('');
         setScannedProducts([]);
+        setShowClearAllConfirm(false);
+        setQrToRemove(null);
         onClose();
+    };
+
+    const handleRequestClose = () => {
+        if (scannedProducts.length > 0) {
+            setShowClearAllConfirm(true);
+        } else {
+            handleClose();
+        }
     };
 
     if (!open) return null;
@@ -198,7 +223,7 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
                         </h2>
                     </div>
                     <button
-                        onClick={handleClose}
+                        onClick={handleRequestClose}
                         className='text-gray-400 hover:text-red-500 text-3xl font-light cursor-pointer transition'
                     >
                         <X size={28} />
@@ -275,7 +300,7 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
                         <ProductList
                             products={scannedProducts}
                             mode='edit'
-                            onRemoveProduct={handleRemoveProduct}
+                            onRemoveProduct={handleRequestRemoveProduct}
                             selectedIndex={selectedIndex}
                             lastProductRef={lastProductRef}
                             newItems={newlyAdded}
@@ -326,6 +351,34 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
                 type={toastType}
                 message={toastMessage}
                 onClose={() => setToastOpen(false)}
+            />
+
+            <ConfirmDeleteModal
+                open={showClearAllConfirm}
+                title='Xác nhận xóa tất cả'
+                message={
+                    <>
+                        <span>Bạn có chắc chắn muốn xóa toàn bộ </span>
+                        <span className='font-bold text-primary-600'>{scannedProducts.length}</span>
+                        <span> sản phẩm đã quét không?</span>
+                    </>
+                }
+                onClose={() => setShowClearAllConfirm(false)}
+                onConfirm={handleClose}
+            />
+
+            <ConfirmDeleteModal
+                open={!!qrToRemove}
+                title='Xác nhận xóa sản phẩm'
+                message={
+                    <>
+                        <span>Bạn có chắc chắn muốn xóa sản phẩm có mã QR: </span>
+                        <span className='font-bold text-primary-600'>{qrToRemove || ''}</span>
+                        <span>?</span>
+                    </>
+                }
+                onClose={() => setQrToRemove(null)}
+                onConfirm={handleConfirmRemoveProduct}
             />
         </div>
     );

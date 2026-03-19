@@ -26,14 +26,17 @@ const EditSystemConfigModal: React.FC<EditSystemConfigModalProps> = ({
     useEffect(() => {
         if (open && config) {
             const isUrlConfig = config.value?.startsWith('http://') || config.value?.startsWith('https://');
-            setIsUrl(isUrlConfig || config.key.toLowerCase().includes('url') || config.key.toLowerCase().includes('file'));
-            
-            if (!isUrlConfig) {
+            const shouldBeUrl = isUrlConfig || config.key.toLowerCase().includes('url') || config.key.toLowerCase().includes('file');
+            if (isUrl !== shouldBeUrl) setIsUrl(shouldBeUrl);
+
+            if (!shouldBeUrl) {
                 const num = Number(config.value);
-                setValue(!isNaN(num) ? num : 0);
+                const newValue = !isNaN(num) ? num : 0;
+                if (value !== newValue) setValue(newValue);
             }
             setFile(null);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, config]);
 
     const handleConfirm = () => {

@@ -1,19 +1,15 @@
 import React from 'react';
-import { formatNumber } from '@/utils/formatNumber';
 import { Eye } from 'lucide-react';
+import { formatNumber } from '@/utils/formatNumber';
 
-interface CompanyShowProps {
-    company: any;
+interface VoucherShowProps {
+    voucher: any;
     onView: () => void;
     index?: number;
+    isLast?: boolean;
 }
 
-const CompanyShow: React.FC<CompanyShowProps & { isLast?: boolean }> = ({
-    company,
-    onView,
-    isLast = false,
-    index
-}) => {
+const VoucherShow: React.FC<VoucherShowProps> = ({ voucher, onView, index, isLast = false }) => {
     const rowBg = (index ?? 0) % 2 === 0 ? 'bg-white' : 'bg-primary-50';
 
     return (
@@ -23,19 +19,11 @@ const CompanyShow: React.FC<CompanyShowProps & { isLast?: boolean }> = ({
                     {typeof index === 'number' ? formatNumber(index + 1) : ''}
                 </span>
             </td>
-            <td className='py-3 px-4 font-medium w-44'>
-                <div className='text-gray-900'>{company.name || 'Không rõ'}</div>
-            </td>
-            <td className='py-3 px-4 text-gray-700 w-52'>
-                {company.companyEmail || <span className='text-gray-400'>Chưa có</span>}
-            </td>
-            <td className='py-3 px-4 text-gray-700 w-36'>
-                {company.phone || <span className='text-gray-400'>Chưa có</span>}
-            </td>
-            <td className='py-3 px-4 text-gray-700 w-52'>
-                {company.city || <span className='text-gray-400'>Chưa có</span>}
-            </td>
-            <td className='py-3 px-4 w-36'>
+            <td className='py-3 px-4 font-medium text-gray-900'>{voucher?.code || 'Không rõ'}</td>
+            <td className='py-3 px-4 text-gray-700'>{voucher?.name || 'Không rõ'}</td>
+            <td className='py-3 px-4 text-right text-gray-700'>{voucher?.value ?? 0}</td>
+            <td className='py-3 px-4 text-right text-gray-700'>{voucher?.pointsToRedeem ?? 0}</td>
+            <td className='py-3 px-4'>
                 <div className='flex justify-center gap-2'>
                     <button
                         onClick={onView}
@@ -50,4 +38,4 @@ const CompanyShow: React.FC<CompanyShowProps & { isLast?: boolean }> = ({
     );
 };
 
-export default CompanyShow;
+export default VoucherShow;

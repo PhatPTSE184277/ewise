@@ -59,7 +59,7 @@ const CreateNotiModal: React.FC<CreateNotiModalProps> = ({
             });
         }
         return () => { ignore = true; };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
     }, [open, step, search, fromDate, toDate]);
 
     const handleToggleSelect = (userId: string) => {

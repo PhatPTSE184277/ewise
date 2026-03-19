@@ -186,7 +186,7 @@ const CompanyPage: React.FC = () => {
                                 onClick={() => setShowImportModal(true)}
                             >
                                 <IoCloudUploadOutline size={20} />
-                                Import từ Excel
+                                Nhập từ Excel
                             </button>
                         </>
                     )}

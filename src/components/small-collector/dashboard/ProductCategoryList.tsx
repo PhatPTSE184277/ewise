@@ -1,5 +1,6 @@
 import React from 'react';
 import ProductCategoryListSkeleton from './ProductCategoryListSkeleton';
+import { formatNumber } from '@/utils/formatNumber';
 
 interface ProductCategory {
   categoryName: string;
@@ -48,8 +49,8 @@ const ProductCategoryList: React.FC<ProductCategoryListProps & { total?: number 
                     className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}
                   >
                     <td className='py-3 px-4 font-medium w-16'>
-                      <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-xs flex items-center justify-center font-semibold'>
-                        {idx + 1}
+                      <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+                        {formatNumber(idx + 1)}
                       </span>
                     </td>
                     <td className='py-3 px-4 font-medium text-gray-900'>

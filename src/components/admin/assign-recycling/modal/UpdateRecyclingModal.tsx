@@ -37,19 +37,22 @@ const UpdateRecyclingModal: React.FC<UpdateRecyclingModalProps> = ({
 
     // Fetch small points when modal opens
     useEffect(() => {
-        if (open && companyId) {
-            setLoading(true);
-            getScpAssignmentDetail(companyId)
-                .then((data) => {
-                    setSmallPoints(data?.smallPoints || []);
-                })
-                .catch(() => {
-                    setSmallPoints([]);
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-        }
+        let isMounted = true;
+        const fetchData = async () => {
+            if (open && companyId) {
+                if (isMounted) setLoading(true);
+                try {
+                    const data = await getScpAssignmentDetail(companyId);
+                    if (isMounted) setSmallPoints(data?.smallPoints || []);
+                } catch {
+                    if (isMounted) setSmallPoints([]);
+                } finally {
+                    if (isMounted) setLoading(false);
+                }
+            }
+        };
+        fetchData();
+        return () => { isMounted = false; };
     }, [open, companyId, getScpAssignmentDetail]);
 
     const handleOpenCompanyModal = async (pointId: string) => {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Eye } from 'lucide-react';
+import { formatNumber } from '@/utils/formatNumber';
 
 interface IWProductShowProps {
     product: any;
@@ -13,8 +14,8 @@ const IWProductShow: React.FC<IWProductShowProps & { isLast?: boolean; stt?: num
     return (
         <tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg} transition-colors`}>
             <td className='py-3 px-4 text-center w-[5vw] min-w-10'>
-                <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto'>
-                    {stt}
+                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+                    {formatNumber(stt)}
                 </span>
             </td>
             <td className='py-3 px-4 font-medium w-[14vw] min-w-20'>

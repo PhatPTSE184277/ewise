@@ -17,6 +17,7 @@ import { DashboardProvider } from '@/contexts/admin/DashboardContext';
 import { SendNotiProvider } from '@/contexts/admin/SendNotiContext';
 import { SpeedProvider } from '@/contexts/admin/SpeedContext';
 import { CapacityProvider } from '@/contexts/admin/CapacityContext';
+import { VoucherProvider } from '@/contexts/admin/VoucherContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 
 function AdminLayoutContent({ children, sidebarOpen, setSidebarOpen }: { children: React.ReactNode; sidebarOpen: boolean; setSidebarOpen: (open: boolean) => void }) {
@@ -89,9 +90,11 @@ export default function AdminLayout({
                                             <TrackingProvider>
                                                 <DashboardProvider>
                                                     <CapacityProvider>
-                                                        <AdminLayoutContent sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-                                                            {children}
-                                                        </AdminLayoutContent>
+                                                        <VoucherProvider>
+                                                            <AdminLayoutContent sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+                                                                {children}
+                                                            </AdminLayoutContent>
+                                                        </VoucherProvider>
                                                     </CapacityProvider>
                                                 </DashboardProvider>
                                             </TrackingProvider>

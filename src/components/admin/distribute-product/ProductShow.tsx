@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatAddress } from '../../../utils/FormatAddress';
+import { formatNumber } from '@/utils/formatNumber';
 
 interface ProductShowProps {
     product: any;
@@ -39,7 +40,7 @@ const ProductShow: React.FC<ProductShowProps> = ({
             )}
             <td className='py-3 px-4 text-center w-[5vw]'>
                 <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
-                    {stt}
+                    {formatNumber(stt)}
                 </span>
             </td>
             <td className='py-3 px-4 w-[15vw]'>

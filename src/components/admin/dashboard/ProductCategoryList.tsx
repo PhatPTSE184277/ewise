@@ -52,7 +52,7 @@ const ProductCategoryList: React.FC<ProductCategoryListProps & { total?: number 
                             className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`} style={{ height: '4.5vh', minHeight: '44px' }}
                           >
                           <td className="py-3 px-4 text-center w-[5vw] min-w-[5vw]">
-                            <span className="w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto">
+                            <span className="inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2">
                               {idx + 1}
                             </span>
                           </td>

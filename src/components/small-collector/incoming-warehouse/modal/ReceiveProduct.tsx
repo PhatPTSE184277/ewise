@@ -5,9 +5,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import Toast from '@/components/ui/Toast';
 import CustomNumberInput from '@/components/ui/CustomNumberInput';
 import CustomTextarea from '@/components/ui/CustomTextarea';
-import { X, Package as PackageIcon, ArrowRight } from 'lucide-react';
+import { X, Package as PackageIcon, ArrowRight, Loader2 } from 'lucide-react';
 import { getProductByQRCode, getProductById } from '@/services/small-collector/IWProductService';
 import ReceiveProductList, { ReceiveScannedProduct } from './ReceiveProductList';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 
 interface ReceiveProductProps {
     open: boolean;
@@ -56,6 +57,8 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
 
     const [updatedProductIds, setUpdatedProductIds] = useState<string[]>([]);
     const [confirmingReceive, setConfirmingReceive] = useState(false);
+    const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
+    const [productToRemove, setProductToRemove] = useState<ReceiveScannedProduct | null>(null);
 
     const qrInputRef = useRef<HTMLInputElement>(null);
 
@@ -94,9 +97,26 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
             setShowEditModal(false);
             setUpdatedProductIds([]);
             setConfirmingReceive(false);
+            setShowClearAllConfirm(false);
+            setProductToRemove(null);
             setTimeout(() => qrInputRef.current?.focus(), 100);
         }
     }, [open]);
+
+    const resetModalState = () => {
+        setQrCode('');
+        setScannedProducts([]);
+        setLatestQr(null);
+        setSelectedProduct(null);
+        setSelectedTags([]);
+        setCustomReason('');
+        setPoint(0);
+        setShowEditModal(false);
+        setUpdatedProductIds([]);
+        setConfirmingReceive(false);
+        setShowClearAllConfirm(false);
+        setProductToRemove(null);
+    };
 
     const getBasePoint = (product: any) => {
         const real = product?.realPoints ?? product?.realPoint;
@@ -263,7 +283,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
         setPoint(0);
     };
 
-    const handleRemoveProduct = (product: ReceiveScannedProduct) => {
+    const removeProductFromList = (product: ReceiveScannedProduct) => {
         setScannedProducts((prev) =>
             prev.filter((p) => p.productId !== product.productId)
         );
@@ -271,6 +291,16 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
             prev.filter((id) => id !== product.productId)
         );
         if (latestQr === product.qrCode) setLatestQr(null);
+    };
+
+    const handleRequestRemoveProduct = (product: ReceiveScannedProduct) => {
+        setProductToRemove(product);
+    };
+
+    const handleConfirmRemoveProduct = () => {
+        if (!productToRemove) return;
+        removeProductFromList(productToRemove);
+        setProductToRemove(null);
     };
 
     const handleConfirmReceive = async () => {
@@ -297,16 +327,18 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
         }
     };
 
-    const handleClose = () => {
-        setQrCode('');
-        setScannedProducts([]);
-        setSelectedProduct(null);
-        setSelectedTags([]);
-        setCustomReason('');
-        setPoint(0);
-        setShowEditModal(false);
-        setUpdatedProductIds([]);
-        setConfirmingReceive(false);
+    const handleRequestClose = () => {
+        if (scannedProducts.length > 0) {
+            setShowClearAllConfirm(true);
+        } else {
+            // nothing to clear, just close
+            resetModalState();
+            onClose();
+        }
+    };
+
+    const handleConfirmClose = () => {
+        resetModalState();
         onClose();
     };
 
@@ -339,7 +371,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                             <h2 className='text-2xl font-bold text-gray-900'>Nhận hàng từ shipper</h2>
                         </div>
                         <button
-                            onClick={handleClose}
+                            onClick={handleRequestClose}
                             className='text-gray-400 hover:text-red-500 text-3xl font-light cursor-pointer transition'
                         >
                             <X size={28} />
@@ -347,7 +379,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                     </div>
 
                     <div className='flex-1 p-6 space-y-6 bg-gray-50 overflow-y-auto'>
-                        <div className='bg-white rounded-xl p-4 shadow-sm border border-primary-100'>
+                        <div className='bg-white rounded-xl p-4 shadow-sm border border-transparent'>
                             <label className='block text-sm font-medium text-gray-700 mb-2'>
                                 Mã sản phẩm <span className='text-red-500'>*</span>
                             </label>
@@ -373,7 +405,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                                     disabled={loading}
                                     className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer'
                                 >
-                                    {loading ? 'Đang tìm...' : <ArrowRight className='w-5 h-5' />}
+                                    {loading ? <Loader2 className='w-5 h-5 animate-spin' /> : <ArrowRight className='w-5 h-5' />}
                                 </button>
                             </form>
                         </div>
@@ -384,7 +416,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                             latestQr={latestQr}
                             updatedProductIds={updatedProductIds}
                             onEdit={(product) => handleEditProduct(product as ScannedProduct)}
-                            onRemove={handleRemoveProduct}
+                            onRemove={handleRequestRemoveProduct}
                             maxHeight={32}
                         />
                     </div>
@@ -398,7 +430,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                             disabled={confirmingReceive || scannedProducts.length === 0}
                             className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer shadow-md'
                         >
-                            {confirmingReceive ? 'Đang xác nhận...' : 'Xác nhận nhận kho'}
+                            {confirmingReceive ? <Loader2 className='w-4 h-4 animate-spin' /> : 'Xác nhận'}
                         </button>
                     </div>
                 </div>
@@ -602,6 +634,34 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                     </div>
                 </div>
             )}
+
+            <ConfirmDeleteModal
+                open={showClearAllConfirm}
+                title='Xác nhận xóa tất cả'
+                message={
+                    <>
+                        <span>Bạn có chắc chắn muốn xóa toàn bộ </span>
+                        <span className="font-bold text-primary-600">{scannedProducts.length}</span>
+                        <span> sản phẩm đã quét không?</span>
+                    </>
+                }
+                onClose={() => setShowClearAllConfirm(false)}
+                onConfirm={handleConfirmClose}
+            />
+
+            <ConfirmDeleteModal
+                open={!!productToRemove}
+                title='Xác nhận xóa sản phẩm'
+                message={
+                    <>
+                        <span>Bạn có chắc chắn muốn xóa sản phẩm có mã QR: </span>
+                        <span className="font-bold text-primary-600">{productToRemove?.qrCode || ''}</span>
+                        <span>?</span>
+                    </>
+                }
+                onClose={() => setProductToRemove(null)}
+                onConfirm={handleConfirmRemoveProduct}
+            />
         </>
     );
 };

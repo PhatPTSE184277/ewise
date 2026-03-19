@@ -126,7 +126,7 @@ const CollectorPage: React.FC = () => {
                         onClick={() => setShowImportModal(true)}
                     >
                         <IoCloudUploadOutline size={20} />
-                        Import từ Excel
+                        Nhập từ Excel
                     </button>
                     <div className='flex-1 max-w-md'>
                         <SearchBox

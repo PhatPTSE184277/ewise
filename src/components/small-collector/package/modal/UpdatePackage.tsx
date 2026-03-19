@@ -5,6 +5,7 @@ import { getProductByQRCode } from '@/services/small-collector/IWProductService'
 import ProductList from './ProductList';
 import Toast from '@/components/ui/Toast';
 import Pagination from '@/components/ui/Pagination';
+import ConfirmDeleteModal from '../../incoming-warehouse/modal/ConfirmDeleteModal';
 
 interface UpdatePackageProps {
     open: boolean;
@@ -45,6 +46,8 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
     const lastProductRef = useRef<HTMLTableRowElement>(null);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [productPage, setProductPage] = useState(1);
+    const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
+    const [qrToRemove, setQrToRemove] = useState<string | null>(null);
     const PAGE_SIZE = 10;
 
     // Helper to show toast and immediately focus input
@@ -85,7 +88,9 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
             };
             loadExistingProducts();
             setQrCodeInput('');
-        setProductPage(1);
+            setProductPage(1);
+            setShowClearAllConfirm(false);
+            setQrToRemove(null);
         }
     }, [open, initialData]);
 
@@ -163,13 +168,23 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
         }
     };
 
-    const handleRemoveProduct = (qrCode: string) => {
+    const removeProductFromList = (qrCode: string) => {
         setScannedProducts((prev) => prev.filter((p) => p.qrCode !== qrCode));
         setNewlyAdded((s) => {
             const copy = new Set(s);
             copy.delete(qrCode);
             return copy;
         });
+    };
+
+    const handleRequestRemoveProduct = (qrCode: string) => {
+        setQrToRemove(qrCode);
+    };
+
+    const handleConfirmRemoveProduct = () => {
+        if (!qrToRemove) return;
+        removeProductFromList(qrToRemove);
+        setQrToRemove(null);
     };
 
     const handleSubmit = () => {
@@ -193,7 +208,17 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
         setScannedProducts([]);
         setNewlyAdded(new Set());
         setProductPage(1);
+        setShowClearAllConfirm(false);
+        setQrToRemove(null);
         onClose();
+    };
+
+    const handleRequestClose = () => {
+        if (newlyAdded.size > 0) {
+            setShowClearAllConfirm(true);
+        } else {
+            handleClose();
+        }
     };
 
     const totalPages = Math.ceil(scannedProducts.length / PAGE_SIZE);
@@ -226,7 +251,7 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
                         </h2>
                     </div>
                     <button
-                        onClick={handleClose}
+                        onClick={handleRequestClose}
                         className='text-gray-400 hover:text-red-500 text-3xl font-light cursor-pointer transition'
                     >
                         <X size={28} />
@@ -279,7 +304,7 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
                         <ProductList
                             products={pagedProducts}
                             mode='edit'
-                            onRemoveProduct={handleRemoveProduct}
+                            onRemoveProduct={handleRequestRemoveProduct}
                             selectedIndex={pagedSelectedIndex}
                             lastProductRef={lastProductRef}
                             striped={false}
@@ -355,6 +380,34 @@ const UpdatePackage: React.FC<UpdatePackageProps> = ({
                 type={toastType}
                 message={toastMessage}
                 onClose={() => setToastOpen(false)}
+            />
+
+            <ConfirmDeleteModal
+                open={showClearAllConfirm}
+                title='Xác nhận xóa tất cả'
+                message={
+                    <>
+                        <span>Bạn có chắc chắn muốn xóa toàn bộ </span>
+                        <span className='font-bold text-primary-600'>{newlyAdded.size}</span>
+                        <span> sản phẩm vừa quét chưa xác nhận không?</span>
+                    </>
+                }
+                onClose={() => setShowClearAllConfirm(false)}
+                onConfirm={handleClose}
+            />
+
+            <ConfirmDeleteModal
+                open={!!qrToRemove}
+                title='Xác nhận xóa sản phẩm'
+                message={
+                    <>
+                        <span>Bạn có chắc chắn muốn xóa sản phẩm có mã QR: </span>
+                        <span className='font-bold text-primary-600'>{qrToRemove || ''}</span>
+                        <span>?</span>
+                    </>
+                }
+                onClose={() => setQrToRemove(null)}
+                onConfirm={handleConfirmRemoveProduct}
             />
         </div>
     );

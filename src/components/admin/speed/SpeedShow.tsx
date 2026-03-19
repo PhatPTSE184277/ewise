@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit } from 'lucide-react';
+import { formatNumber } from '@/utils/formatNumber';
 import { SpeedData } from '@/services/admin/SpeedService';
 
 interface SpeedShowProps {
@@ -15,8 +16,8 @@ const SpeedShow: React.FC<SpeedShowProps> = ({ speed, index, isLast = false, onE
 	return (
 		<tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}>
 			<td className='py-3 px-4 text-center w-16'>
-				<span className='w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto'>
-					{index + 1}
+				<span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+					{formatNumber(index + 1)}
 				</span>
 			</td>
 			<td className='py-3 px-4 font-medium text-gray-900 w-48'>

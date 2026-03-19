@@ -3,6 +3,7 @@
 import React from 'react';
 import TrackingProductSkeleton from './TrackingProductSkeleton';
 import { Eye } from 'lucide-react';
+import { formatNumber } from '@/utils/formatNumber';
 
 interface TrackingProductListProps {
     packages: any[];
@@ -22,7 +23,6 @@ const TrackingProductList: React.FC<TrackingProductListProps> = ({ packages, loa
                                 <th className='py-3 px-4 text-center w-[5vw]'>STT</th>
                                 <th className='py-3 px-4 text-left w-[18vw]'>Mã package</th>
                                 <th className='py-3 px-4 text-left w-[16vw]'>Điểm thu gom</th>
-                                <th className='py-3 px-4 text-left w-[12vw]'>Trạng thái</th>
                                 <th className='py-3 px-4 text-right w-[10vw]'>Số sản phẩm</th>
                                 <th className='py-3 px-4 text-center w-[10vw]'>Hành động</th>
                             </tr>
@@ -48,8 +48,8 @@ const TrackingProductList: React.FC<TrackingProductListProps> = ({ packages, loa
                                             className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}
                                         >
                                             <td className='py-3 px-4 text-center w-[5vw]'>
-                                                <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto'>
-                                                    {pkg.stt}
+                                                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+                                                    {formatNumber(pkg.stt)}
                                                 </span>
                                             </td>
                                             <td className='py-3 px-4 text-gray-700 w-[18vw]'>
@@ -57,9 +57,6 @@ const TrackingProductList: React.FC<TrackingProductListProps> = ({ packages, loa
                                             </td>
                                             <td className='py-3 px-4 text-gray-700 w-[16vw]'>
                                                 <span>{pkg.smallCollectionPointsName || pkg.smallCollectionPointsAddress || 'N/A'}</span>
-                                            </td>
-                                            <td className='py-3 px-4 text-gray-700 w-[12vw]'>
-                                                <span>{pkg.status || 'N/A'}</span>
                                             </td>
                                             <td className='py-3 px-4 text-right text-gray-700 w-[10vw]'>
                                                 <span>{pkg.products?.totalItems ?? pkg.totalItems ?? 0}</span>

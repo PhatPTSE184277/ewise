@@ -9,7 +9,8 @@ import {
     MapPin,
     Zap,
     Recycle,
-    Bell
+    Bell,
+    TicketPercent
 } from 'lucide-react';
 
 export const adminMenuItems = [
@@ -72,6 +73,12 @@ export const adminMenuItems = [
         label: 'Người dùng',
         path: '/admin/user',
         icon: <Users size={20} />
+    },
+    {
+        id: 'voucher',
+        label: 'Voucher',
+        path: '/admin/voucher',
+        icon: <TicketPercent size={20} />
     },
     {
         id: 'send-notification',

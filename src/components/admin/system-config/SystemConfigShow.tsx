@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit, Download } from 'lucide-react';
+import { formatNumber } from '@/utils/formatNumber';
 import { SystemConfig } from '@/services/admin/SystemConfigService';
 
 interface SystemConfigShowProps {
@@ -32,8 +33,8 @@ const SystemConfigShow: React.FC<SystemConfigShowProps> = ({
     return (
         <tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}>
             <td className='py-3 px-4 text-center' style={{ width: '60px' }}>
-                <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-base flex items-center justify-center font-bold mx-auto shadow-sm'>
-                    {index !== undefined ? index + 1 : ''}
+                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+                    {index !== undefined ? formatNumber(index + 1) : ''}
                 </span>
             </td>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Eye, CheckCircle, Ban } from 'lucide-react';
+import { formatNumber } from '@/utils/formatNumber';
 import { VehicleItem } from '@/services/small-collector/VehicleService';
 
 interface VehicleShowProps {
@@ -19,8 +20,8 @@ const VehicleShow: React.FC<VehicleShowProps> = ({ vehicle, onView, onApprove, o
     return (
         <tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}>
             <td className='py-3 px-4 text-center w-[6vw]'>
-                <span className='w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto'>
-                    {index !== undefined ? index + 1 : ''}
+                <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
+                    {index !== undefined ? formatNumber(index + 1) : ''}
                 </span>
             </td>
             <td className='py-3 px-4 w-[14vw]'>
