@@ -219,7 +219,7 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
                 <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 border-primary-100'>
                     <div>
                         <h2 className='text-2xl font-bold text-gray-900'>
-                            Tạo Package Mới
+                            Tạo kiện hàng mới
                         </h2>
                     </div>
                     <button
@@ -234,17 +234,17 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
                 <div className='flex-1 p-6 space-y-6 bg-gray-50'>
                     {/* Package ID & QR Scanner in one row */}
                     <div className='flex flex-col md:flex-row gap-4'>
-                        {/* Mã Package */}
+                        {/* Mã kiện hàng */}
                         <div className='bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex-1'>
                             <label className='block text-sm font-medium text-gray-700 mb-2'>
-                                Mã Package <span className='text-red-500'>*</span>
+                                Mã kiện hàng <span className='text-red-500'>*</span>
                             </label>
                             <div className='relative'>
                                 <input
                                     type='text'
                                     value={packageId}
                                     onChange={(e) => setPackageId(e.target.value)}
-                                    placeholder='Quét hoặc nhập mã package...'
+                                    placeholder='Quét hoặc nhập mã kiện hàng...'
                                     disabled={loading}
                                     className='w-full pl-10 pr-4 py-2 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400 disabled:bg-gray-100'
                                     autoComplete='off'
@@ -323,7 +323,7 @@ const CreatePackage: React.FC<CreatePackageProps> = ({
                             disabled={scannedProducts.length === 0}
                             className='px-5 py-2 rounded-lg font-medium text-white cursor-pointer shadow-md transition-all duration-200 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 border border-primary-200'
                         >
-                            Tạo Package
+                            Tạo kiện hàng   
                         </button>
                     </div>
                 </div>

@@ -5,15 +5,28 @@ interface ConfirmCloseModalProps {
     deadlineUnassignedCount: number;
     onConfirm: () => void;
     onClose: () => void;
+    title?: string;
+    description?: string;
+    confirmText?: string;
 }
 
 const ConfirmCloseModal: React.FC<ConfirmCloseModalProps> = ({
     open,
     deadlineUnassignedCount,
     onConfirm,
-    onClose
+    onClose,
+    title,
+    description,
+    confirmText
 }) => {
     if (!open) return null;
+
+    const modalTitle = title || 'Xác nhận đóng';
+    const modalConfirmText = confirmText || 'Xác nhận';
+    const modalDescription =
+        description ||
+        `Hiện tại có ${deadlineUnassignedCount} sản phẩm hạn chót chưa được phân chia.\nBạn có chắc chắn muốn đóng màn hình này không?`;
+    const [firstLine, secondLine] = modalDescription.split('\n');
 
     return (
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4">
@@ -21,7 +34,7 @@ const ConfirmCloseModal: React.FC<ConfirmCloseModalProps> = ({
 
             <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 animate-fadeIn">
                 <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-red-50 to-primary-100">
-                    <h2 className="text-2xl font-bold text-gray-900">Xác nhận đóng</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">{modalTitle}</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-red-500 text-3xl font-light cursor-pointer"
@@ -32,12 +45,8 @@ const ConfirmCloseModal: React.FC<ConfirmCloseModalProps> = ({
                 </div>
 
                 <div className="p-6 flex-1 overflow-y-auto bg-gray-50 text-sm text-gray-700 space-y-2">
-                    <p>
-                        Hiện tại có{' '}
-                        <span className="font-bold text-red-600">{deadlineUnassignedCount}</span>{' '}
-                        sản phẩm hạn chót chưa được phân chia.
-                    </p>
-                    <p>Bạn có chắc chắn muốn đóng màn hình này không?</p>
+                    <p>{firstLine}</p>
+                    {secondLine && <p>{secondLine}</p>}
                 </div>
 
                 <div className="flex justify-end gap-3 p-5 border-t border-gray-100 bg-gray-50">
@@ -45,7 +54,7 @@ const ConfirmCloseModal: React.FC<ConfirmCloseModalProps> = ({
                         onClick={onConfirm}
                         className="px-5 py-2 rounded-lg font-medium text-white bg-primary-700 hover:bg-primary-800 transition cursor-pointer"
                     >
-                        Xác nhận
+                        {modalConfirmText}
                     </button>
                 </div>
 

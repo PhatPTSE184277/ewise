@@ -51,7 +51,7 @@ const PackageShow: React.FC<PackageShowProps> = ({
                             <button
                                 onClick={() => onUpdate(pkg)}
                                 className='text-primary-600 hover:text-primary-800 flex items-center gap-1 font-medium transition cursor-pointer'
-                                title='Chỉnh sửa package'
+                                title='Chỉnh sửa kiện hàng'
                             >
                                 <Pencil size={18} />
                             </button>

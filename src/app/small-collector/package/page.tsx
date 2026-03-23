@@ -141,7 +141,7 @@ const PackagePage: React.FC = () => {
                         <Package className='text-white' size={20} />
                     </div>
                     <h1 className='text-3xl font-bold text-gray-900'>
-                        Quản lý Package
+                        Quản lý kiện hàng
                     </h1>
                 </div>
                 <div className='flex gap-4 items-center flex-1 justify-end'>
@@ -157,13 +157,13 @@ const PackagePage: React.FC = () => {
                         className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium shadow-md cursor-pointer'
                     >
                         <Plus size={20} />
-                        Tạo package
+                        Tạo kiện hàng
                     </button>
                     <div className='flex-1 max-w-md'>
                         <SearchBox
                             value={search}
                             onChange={setSearch}
-                            placeholder='Tìm kiếm package...'
+                            placeholder='Tìm kiếm kiện hàng...'
                         />
                     </div>
                 </div>

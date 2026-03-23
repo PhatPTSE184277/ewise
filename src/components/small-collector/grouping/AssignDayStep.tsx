@@ -7,6 +7,7 @@ import ProductList from './ProductList';
 import Pagination from '@/components/ui/Pagination';
 import UnassignedProductsModal from './modal/UnassignedProductsModal';
 import VehicleSelectionModal from './modal/VehicleSelectionModal';
+import ConfirmCloseModal from './modal/ConfirmCloseModal';
 import {
     UNASSIGNED_PRODUCTS_DEFAULT_REASON,
     UNASSIGNED_PRODUCTS_REASON_OPTIONS
@@ -66,6 +67,7 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
     const [selectedAdditionalVehicleIds, setSelectedAdditionalVehicleIds] = useState<string[]>([]);
     const [loadingRemainingVehicles, setLoadingRemainingVehicles] = useState(false);
     const [confirmingAdditionalVehicles, setConfirmingAdditionalVehicles] = useState(false);
+    const [showCloseAddVehicleConfirm, setShowCloseAddVehicleConfirm] = useState(false);
     const [selectedUnassignedReason, setSelectedUnassignedReason] = useState<string>(
         UNASSIGNED_PRODUCTS_DEFAULT_REASON
     );
@@ -78,6 +80,37 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
         selectedUnassignedReason === UNASSIGNED_PRODUCTS_DEFAULT_REASON
             ? preAssignDeadlineMessage
             : undefined;
+
+    const parseSuggestedAdditionalVehicleCount = (): number => {
+        const suggestion = preAssignResult?.criticalGapSuggestion;
+        if (!suggestion) return 0;
+
+        const candidateValues = [
+            suggestion?.suggestedVehicleCount,
+            suggestion?.recommendedVehicleCount,
+            suggestion?.additionalVehicleCount,
+            suggestion?.requiredVehicleCount,
+            suggestion?.totalSuggestedVehicles,
+            suggestion?.count,
+            suggestion?.needVehicleCount
+        ];
+
+        for (const value of candidateValues) {
+            const normalized = Number(value);
+            if (Number.isFinite(normalized) && normalized > 0) {
+                return Math.floor(normalized);
+            }
+        }
+
+        const message = String(suggestion?.message || preAssignResult?.message || '');
+        const match = message.match(/(\d+)\s*xe/i);
+        if (!match) return 0;
+
+        const fromMessage = Number(match[1]);
+        return Number.isFinite(fromMessage) && fromMessage > 0 ? fromMessage : 0;
+    };
+
+    const suggestedAdditionalVehicleCount = parseSuggestedAdditionalVehicleCount();
 
     // Fetch vehicles on mount
     useEffect(() => {
@@ -215,30 +248,17 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
         try {
             const vehicles = await fetchAvailableVehiclesForDraft(workDate);
             const normalizedRemainingVehicles = (vehicles || []).map(normalizeVehicleForSelection);
-            const normalizedCurrentVehicles = (previewVehicles || []).map(normalizeVehicleForSelection);
-            const currentVehicleIds =
-                previewVehicles
-                    .map((vehicleData: any) => normalizeVehicleId(vehicleData))
-                    .filter((vehicleId: string) => vehicleId.length > 0);
+            const remainingIds = normalizedRemainingVehicles
+                .map((vehicle: any) => String(vehicle?.vehicleId || ''))
+                .filter((vehicleId: string) => vehicleId.length > 0);
 
-            const mergedVehiclesMap = new Map<string, any>();
-            normalizedCurrentVehicles.forEach((vehicle: any) => {
-                if (vehicle?.vehicleId) {
-                    mergedVehiclesMap.set(String(vehicle.vehicleId), vehicle);
-                }
-            });
-            normalizedRemainingVehicles.forEach((vehicle: any) => {
-                if (vehicle?.vehicleId) {
-                    mergedVehiclesMap.set(String(vehicle.vehicleId), vehicle);
-                }
-            });
+            const shouldAutoSelectAllRemaining =
+                suggestedAdditionalVehicleCount > 0 &&
+                remainingIds.length > 0 &&
+                remainingIds.length < suggestedAdditionalVehicleCount;
 
-            const modalVehicles = Array.from(mergedVehiclesMap.values());
-
-            setRemainingVehicles(modalVehicles);
-            setSelectedAdditionalVehicleIds(
-                currentVehicleIds
-            );
+            setRemainingVehicles(normalizedRemainingVehicles);
+            setSelectedAdditionalVehicleIds(shouldAutoSelectAllRemaining ? remainingIds : []);
             setShowAddVehicleModal(true);
         } catch (error) {
             console.error('Error loading remaining vehicles:', error);
@@ -302,6 +322,47 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
         } finally {
             setConfirmingAdditionalVehicles(false);
         }
+    };
+
+    const shouldAutoSelectAllRemainingVehicles =
+        suggestedAdditionalVehicleCount > 0 &&
+        remainingVehicles.length > 0 &&
+        remainingVehicles.length < suggestedAdditionalVehicleCount;
+
+    const shouldRequireExactAdditionalSelection =
+        suggestedAdditionalVehicleCount > 0 &&
+        remainingVehicles.length >= suggestedAdditionalVehicleCount;
+
+    const deadlineReasonCount = deadlineUnassignedCount;
+    const vehicleFullReasonCount = Math.max(
+        (unassignedProductsTotalAllReasons || 0) - deadlineReasonCount,
+        0
+    );
+
+    const reasonOptionsWithCount = UNASSIGNED_PRODUCTS_REASON_OPTIONS.map((option) => {
+        if (option.id === 'deadline-no-vehicle') {
+            return { ...option, count: deadlineReasonCount };
+        }
+
+        if (option.id === 'vehicle-full') {
+            return { ...option, count: vehicleFullReasonCount };
+        }
+
+        return { ...option, count: 0 };
+    });
+
+    const handleRequestCloseAddVehicleModal = () => {
+        setShowCloseAddVehicleConfirm(true);
+    };
+
+    const handleCancelCloseAddVehicleModal = () => {
+        setShowCloseAddVehicleConfirm(false);
+    };
+
+    const handleConfirmCloseAddVehicleModal = () => {
+        setShowCloseAddVehicleConfirm(false);
+        setShowAddVehicleModal(false);
+        setSelectedAdditionalVehicleIds([]);
     };
 
     return (
@@ -441,7 +502,7 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
                 currentPage={unassignedPage}
                 onPageChange={handleUnassignedPageChange}
                 totalCount={unassignedProductsData?.total || 0}
-                reasonOptions={UNASSIGNED_PRODUCTS_REASON_OPTIONS}
+                reasonOptions={reasonOptionsWithCount}
                 selectedReason={selectedUnassignedReason}
                 onReasonChange={handleUnassignedReasonChange}
                 deadlineUnassignedCount={deadlineUnassignedCount}
@@ -464,7 +525,7 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
 
             <VehicleSelectionModal
                 open={showAddVehicleModal}
-                onClose={() => setShowAddVehicleModal(false)}
+                onClose={handleRequestCloseAddVehicleModal}
                 onConfirm={handleConfirmAddVehicles}
                 vehicles={remainingVehicles}
                 loading={loadingRemainingVehicles}
@@ -473,6 +534,25 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
                 onToggleSelectAll={handleToggleAllAdditionalVehicles}
                 loadThreshold={loadThreshold}
                 confirming={confirmingAdditionalVehicles}
+                requiredSelectionCount={
+                    shouldRequireExactAdditionalSelection ? suggestedAdditionalVehicleCount : undefined
+                }
+                lockSelection={shouldAutoSelectAllRemainingVehicles}
+                lockSelectionMessage={
+                    shouldAutoSelectAllRemainingVehicles
+                        ? `Hệ thống tự chọn tất cả ${remainingVehicles.length} xe còn lại vì thấp hơn mức gợi ý ${suggestedAdditionalVehicleCount} xe.`
+                        : undefined
+                }
+            />
+
+            <ConfirmCloseModal
+                open={showCloseAddVehicleConfirm}
+                deadlineUnassignedCount={0}
+                title='Xác nhận đóng'
+                description='Bạn có chắc chắn muốn đóng màn hình chọn xe?\nDanh sách xe đã chọn sẽ bị hủy.'
+                confirmText='Đóng màn hình'
+                onConfirm={handleConfirmCloseAddVehicleModal}
+                onClose={handleCancelCloseAddVehicleModal}
             />
         </div>
     );

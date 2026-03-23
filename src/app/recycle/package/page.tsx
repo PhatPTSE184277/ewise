@@ -87,7 +87,7 @@ const RecyclePackagePage: React.FC = () => {
                         <Package className='text-white' size={20} />
                     </div>
                     <h1 className='text-3xl font-bold text-gray-900'>
-                        Quản lý Package
+                        Quản lý kiện hàng
                     </h1>
                 </div>
                 <div className='flex gap-4 items-center flex-1 justify-end'>
@@ -112,7 +112,7 @@ const RecyclePackagePage: React.FC = () => {
                         <SearchBox
                             value={search}
                             onChange={setSearch}
-                            placeholder='Tìm kiếm package...'
+                            placeholder='Tìm kiếm kiện hàng...'
                         />
                     </div>
                 </div>

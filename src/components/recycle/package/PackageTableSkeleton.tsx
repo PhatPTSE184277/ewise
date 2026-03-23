@@ -7,7 +7,7 @@ const PackageTableSkeleton: React.FC = () => (
         <td className='py-3 px-4 text-center' style={{ width: '60px' }}>
             <span className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center mx-auto animate-pulse" />
         </td>
-        {/* Mã Package */}
+        {/* Mã kiện hàng */}
         <td className='py-3 px-4' style={{ width: '180px' }}>
             <div className='h-4 bg-gray-200 rounded w-28 animate-pulse' />
         </td>

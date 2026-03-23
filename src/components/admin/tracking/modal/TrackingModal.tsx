@@ -35,7 +35,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
         [
             {
                 icon: <Package size={14} className='text-primary-400' />,
-                label: 'Mã package',
+                label: 'Mã kiện hàng',
                 value: detail?.packageId || 'N/A',
             },
             {
@@ -71,7 +71,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
                 <div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
                     <div>
                         <h2 className='text-2xl font-bold text-gray-800'>
-                            Theo dõi package
+                            Theo dõi kiện hàng
                         </h2>
                     </div>
                     <button

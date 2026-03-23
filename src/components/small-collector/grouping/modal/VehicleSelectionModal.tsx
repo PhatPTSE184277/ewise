@@ -23,6 +23,9 @@ interface VehicleSelectionModalProps {
     onToggleSelectAll: () => void;
     loadThreshold: number;
     confirming?: boolean;
+    requiredSelectionCount?: number;
+    lockSelection?: boolean;
+    lockSelectionMessage?: string;
 }
 
 const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
@@ -35,7 +38,10 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
     onToggleSelect,
     onToggleSelectAll,
     loadThreshold,
-    confirming = false
+    confirming = false,
+    requiredSelectionCount,
+    lockSelection = false,
+    lockSelectionMessage
 }) => {
     if (!open) return null;
 
@@ -44,6 +50,12 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
         vehicles.length > 0 &&
         vehicles.every((v) => normalizedSelectedIds.includes(String(v.vehicleId)));
     const hasSelection = selectedVehicleIds.length > 0;
+    const hasRequiredSelectionCount =
+        typeof requiredSelectionCount === 'number' && requiredSelectionCount > 0;
+    const meetsRequiredSelection = hasRequiredSelectionCount
+        ? selectedVehicleIds.length === requiredSelectionCount
+        : hasSelection;
+    const confirmDisabled = confirming || !meetsRequiredSelection;
 
     return (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
@@ -69,7 +81,7 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
 
                 {/* Summary */}
                 <div className='p-6 pb-4 bg-gray-50'>
-                    <div className='flex items-center gap-4'>
+                    <div className='flex items-center gap-4 flex-wrap'>
                         <div className='flex items-center gap-2'>
                             <span className='text-sm text-gray-600'>Ngưỡng tải:</span>
                             <span className='text-lg font-bold text-primary-600'>{loadThreshold}%</span>
@@ -80,7 +92,16 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
                                 {selectedVehicleIds.length}/{vehicles.length} xe
                             </span>
                         </div>
+                        {hasRequiredSelectionCount && (
+                            <div className='flex items-center gap-2'>
+                                <span className='text-sm text-gray-600'>Cần chọn:</span>
+                                <span className='text-lg font-bold text-primary-600'>{requiredSelectionCount} xe</span>
+                            </div>
+                        )}
                     </div>
+                    {lockSelectionMessage && (
+                        <p className='text-xs text-primary-700 mt-2'>{lockSelectionMessage}</p>
+                    )}
                 </div>
 
                 {/* Vehicle List */}
@@ -95,7 +116,10 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
                                                 type='checkbox'
                                                 checked={allSelected}
                                                 onChange={onToggleSelectAll}
-                                                className='w-4 h-4 cursor-pointer accent-primary-600'
+                                                disabled={lockSelection}
+                                                className={`w-4 h-4 accent-primary-600 ${
+                                                    lockSelection ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                                                }`}
                                             />
                                         </th>
                                         <th className='py-3 px-4 text-center w-16'>STT</th>
@@ -130,18 +154,31 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
                                             return (
                                                 <tr
                                                     key={normalizedVehicleId}
-                                                    onClick={() => onToggleSelect(normalizedVehicleId)}
+                                                    onClick={() => {
+                                                        if (!lockSelection) {
+                                                            onToggleSelect(normalizedVehicleId);
+                                                        }
+                                                    }}
                                                     className={`${
                                                         idx !== vehicles.length - 1 ? 'border-b border-gray-100' : ''
-                                                    } ${rowBg} hover:bg-primary-50/40 transition-colors cursor-pointer`}
+                                                    } ${rowBg} transition-colors ${
+                                                        lockSelection
+                                                            ? 'cursor-not-allowed'
+                                                            : 'hover:bg-primary-50/40 cursor-pointer'
+                                                    }`}
                                                 >
                                                     <td className='py-3 px-4 text-center w-16'>
                                                         <input
                                                             type='checkbox'
                                                             checked={isSelected}
                                                             onChange={() => onToggleSelect(normalizedVehicleId)}
+                                                            disabled={lockSelection}
                                                             onClick={(e) => e.stopPropagation()}
-                                                                className='w-4 h-4 cursor-pointer accent-primary-600'
+                                                            className={`w-4 h-4 accent-primary-600 ${
+                                                                lockSelection
+                                                                    ? 'cursor-not-allowed opacity-60'
+                                                                    : 'cursor-pointer'
+                                                            }`}
                                                         />
                                                     </td>
                                                     <td className='py-3 px-4 text-center w-16'>
@@ -175,9 +212,9 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
                 <div className='p-5 border-t border-primary-100 bg-white flex justify-end gap-3'>
                     <button
                         onClick={() => onConfirm(normalizedSelectedIds)}
-                        disabled={!hasSelection || confirming}
+                        disabled={confirmDisabled}
                         className={`px-6 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${
-                            hasSelection && !confirming
+                            !confirmDisabled
                                 ? 'bg-primary-600 text-white hover:bg-primary-700 cursor-pointer'
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}

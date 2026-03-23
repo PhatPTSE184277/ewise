@@ -126,7 +126,7 @@ const ScanProductModal: React.FC<ScanProductModalProps> = ({
                         items={[
                             {
                                 icon: <Tag size={14} className='text-primary-400' />,
-                                label: 'Mã package',
+                                label: 'Mã kiện hàng',
                                 value: selectedPackage.packageId,
                             },
                             {

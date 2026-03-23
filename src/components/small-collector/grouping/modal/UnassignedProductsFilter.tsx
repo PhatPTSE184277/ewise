@@ -1,10 +1,12 @@
 import React from 'react';
 import { IoFilterOutline } from 'react-icons/io5';
+import { formatNumber } from '@/utils/formatNumber';
 
 export interface UnassignedProductsReasonOption {
     id: string;
     label: string;
     reason: string;
+    count?: number;
 }
 
 export const UNASSIGNED_PRODUCTS_REASON_OPTIONS: UnassignedProductsReasonOption[] = [
@@ -53,7 +55,8 @@ const UnassignedProductsFilter: React.FC<UnassignedProductsFilterProps> = ({
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                         >
-                            {option.label}
+                            {option.label}{' '}
+                            ({formatNumber(Number(option.count ?? 0))})
                         </button>
                     );
                 })}

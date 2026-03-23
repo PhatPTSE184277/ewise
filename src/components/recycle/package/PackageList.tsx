@@ -33,7 +33,7 @@ const PackageList: React.FC<PackageListProps> = ({
                             <thead className='bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-100'>
                                 <tr>
                                     <th className='py-3 px-4 text-center w-[5vw] min-w-[5vw]'>STT</th>
-                                    <th className='py-3 px-4 text-left w-[20vw] min-w-[10vw]'>Mã Package</th>
+                                    <th className='py-3 px-4 text-left w-[20vw] min-w-[10vw]'>Mã kiện hàng</th>
                                     <th className='py-3 px-4 text-right w-[20vw] min-w-[10vw]'>Số sản phẩm</th>
                                     <th className='py-3 px-4 text-center w-[12vw] min-w-[8vw]'>Hành động</th>
                                 </tr>
@@ -57,7 +57,7 @@ const PackageList: React.FC<PackageListProps> = ({
                                 ) : (
                                     <tr>
                                         <td colSpan={4} className='text-center py-8 text-gray-400'>
-                                            Không có package nào.
+                                            Không có kiện hàng nào.
                                         </td>
                                     </tr>
                                 )}

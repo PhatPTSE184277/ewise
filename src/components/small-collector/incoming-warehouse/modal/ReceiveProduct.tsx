@@ -9,6 +9,7 @@ import { X, Package as PackageIcon, ArrowRight, Loader2 } from 'lucide-react';
 import { getProductByQRCode, getProductById } from '@/services/small-collector/IWProductService';
 import ReceiveProductList, { ReceiveScannedProduct } from './ReceiveProductList';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
+import SearchBox from '@/components/ui/SearchBox';
 
 interface ReceiveProductProps {
     open: boolean;
@@ -43,6 +44,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
     onConfirm
 }) => {
     const [qrCode, setQrCode] = useState('');
+    const [qrSearch, setQrSearch] = useState('');
     const [scannedProducts, setScannedProducts] = useState<ScannedProduct[]>([]);
     const [latestQr, setLatestQr] = useState<string | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<ScannedProduct | null>(null);
@@ -88,6 +90,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
     useEffect(() => {
         if (open) {
             setQrCode('');
+            setQrSearch('');
             setScannedProducts([]);
             setLatestQr(null);
             setSelectedProduct(null);
@@ -105,6 +108,7 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
 
     const resetModalState = () => {
         setQrCode('');
+        setQrSearch('');
         setScannedProducts([]);
         setLatestQr(null);
         setSelectedProduct(null);
@@ -350,6 +354,11 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
         setPoint(0);
     };
 
+    const normalizedQrSearch = qrSearch.trim().toLowerCase();
+    const displayedProducts = normalizedQrSearch
+        ? scannedProducts.filter((p) => (p.qrCode || '').toLowerCase().includes(normalizedQrSearch))
+        : scannedProducts;
+
     if (!open) return null;
 
     return (
@@ -383,35 +392,46 @@ const ReceiveProduct: React.FC<ReceiveProductProps> = ({
                             <label className='block text-sm font-medium text-gray-700 mb-2'>
                                 Mã sản phẩm <span className='text-red-500'>*</span>
                             </label>
-                            <form onSubmit={handleScanQR} className='flex gap-2'>
-                                <div className='relative flex-1'>
-                                    <input
-                                        ref={qrInputRef}
-                                        type='text'
-                                        value={qrCode}
-                                        onChange={(e) => setQrCode(e.target.value)}
-                                        placeholder='Quét hoặc nhập mã QR...'
+                            <div className='flex flex-col md:flex-row gap-3'>
+                                <form onSubmit={handleScanQR} className='flex gap-2 flex-1'>
+                                    <div className='relative flex-1'>
+                                        <input
+                                            ref={qrInputRef}
+                                            type='text'
+                                            value={qrCode}
+                                            onChange={(e) => setQrCode(e.target.value)}
+                                            placeholder='Quét hoặc nhập mã QR...'
+                                            disabled={loading}
+                                            className='w-full pl-10 pr-4 py-2 border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400 disabled:bg-gray-100'
+                                            autoComplete='off'
+                                        />
+                                        <PackageIcon
+                                            className='absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-400'
+                                            size={18}
+                                        />
+                                    </div>
+                                    <button
+                                        type='submit'
                                         disabled={loading}
-                                        className='w-full pl-10 pr-4 py-2 border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400 disabled:bg-gray-100'
-                                        autoComplete='off'
-                                    />
-                                    <PackageIcon
-                                        className='absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-400'
-                                        size={18}
+                                        className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer'
+                                    >
+                                        {loading ? <Loader2 className='w-5 h-5 animate-spin' /> : <ArrowRight className='w-5 h-5' />}
+                                    </button>
+                                </form>
+
+                                <div className='w-full md:w-[320px]'>
+                                    <SearchBox
+                                        value={qrSearch}
+                                        onChange={setQrSearch}
+                                        placeholder='Tìm theo mã QR trong danh sách...'
+                                        debounce={200}
                                     />
                                 </div>
-                                <button
-                                    type='submit'
-                                    disabled={loading}
-                                    className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer'
-                                >
-                                    {loading ? <Loader2 className='w-5 h-5 animate-spin' /> : <ArrowRight className='w-5 h-5' />}
-                                </button>
-                            </form>
+                            </div>
                         </div>
 
                         <ReceiveProductList
-                            products={scannedProducts}
+                            products={displayedProducts}
                             loadingTabId={loadingTabId}
                             latestQr={latestQr}
                             updatedProductIds={updatedProductIds}

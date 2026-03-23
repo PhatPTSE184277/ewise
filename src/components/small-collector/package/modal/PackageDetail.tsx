@@ -33,7 +33,7 @@ const PackageDetail: React.FC<PackageDetailProps> = ({
     const summaryItems = [
         {
             icon: <Tag size={14} className='text-primary-400' />,
-            label: 'Mã package',
+            label: 'Mã kiện hàng',
             value: pkg.packageId,
         },
         {

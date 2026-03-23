@@ -72,7 +72,7 @@ export const TrackingProvider: React.FC<Props> = ({ children }) => {
       const data = await filterPackages(params);
       setPackages(Array.isArray(data) ? data : (data.data || []));
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Lỗi khi tải danh sách package');
+      setError(err?.response?.data?.message || 'Lỗi khi tải danh sách kiện hàng');
       setPackages([]);
     } finally {
       setLoadingPackages(false);
@@ -86,7 +86,7 @@ export const TrackingProvider: React.FC<Props> = ({ children }) => {
       const data = await getPackageDetail(packageId, page, limit);
       setPackageDetail(data || null);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Lỗi khi tải chi tiết package');
+      setError(err?.response?.data?.message || 'Lỗi khi tải chi tiết kiện hàng');
       setPackageDetail(null);
     } finally {
       setLoadingPackageDetail(false);

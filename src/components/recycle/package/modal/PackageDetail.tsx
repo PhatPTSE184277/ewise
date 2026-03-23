@@ -24,7 +24,7 @@ const PackageDetail: React.FC<PackageDetailProps> = ({
     const summaryItems = [
         {
             icon: <Tag size={14} className='text-primary-400' />,
-            label: 'Mã package',
+            label: 'Mã kiện hàng',
             value: pkg.packageId,
         },
         {
@@ -56,7 +56,7 @@ const PackageDetail: React.FC<PackageDetailProps> = ({
                 <div className='flex justify-between items-center p-6 border-b bg-linear-to-r from-primary-50 to-primary-100 border-primary-100'>
                     <div>
                         <h2 className='text-2xl font-bold text-gray-900'>
-                            Chi tiết Package
+                            Chi tiết kiện hàng
                         </h2>
                     </div>
                     <button

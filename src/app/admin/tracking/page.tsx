@@ -71,7 +71,7 @@ const TrackingPage: React.FC = () => {
                         <div className='w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center'>
                             <MapPin className='text-white' size={20} />
                         </div>
-                        <h1 className='text-3xl font-bold text-gray-900'>Theo dõi package</h1>
+                        <h1 className='text-3xl font-bold text-gray-900'>Theo dõi kiện hàng</h1>
                     </div>
                     <div className='flex gap-4 items-center flex-1 justify-end'>
                         <div className='w-72'>
@@ -110,7 +110,7 @@ const TrackingPage: React.FC = () => {
             {/* Package List */}
             {!selectedCompanyId ? (
                 <div className='bg-white rounded-2xl shadow-lg border border-gray-100 p-8 text-center text-gray-400'>
-                    Vui lòng chọn công ty để xem danh sách package
+                    Vui lòng chọn công ty để xem danh sách kiện hàng
                 </div>
             ) : (
                 <>  

@@ -223,11 +223,11 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
         if (!role) return 'bg-white';
         switch (role) {
             case 'AdminWarehouse':
-                return 'bg-primary-50';
+                return 'bg-primary-300';
             case 'AdminCompany':
-                return 'bg-green-50';
+                return 'bg-green-300';
             case 'RecyclingCompany':
-                return 'bg-blue-50';
+                return 'bg-blue-300';
             default:
                 return 'bg-white';
         }
