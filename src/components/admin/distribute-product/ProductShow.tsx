@@ -49,7 +49,12 @@ const ProductShow: React.FC<ProductShowProps> = ({
                 </div>
             </td>
             <td className='py-3 px-4 w-[20vw]'>
-                <div className='line-clamp-2'>{formatAddress(product.address) || 'N/A'}</div>
+                <div
+                    className='line-clamp-2'
+                    title={formatAddress(product.address) || 'N/A'}
+                >
+                    {formatAddress(product.address) || 'N/A'}
+                </div>
             </td>
         </tr>
     );

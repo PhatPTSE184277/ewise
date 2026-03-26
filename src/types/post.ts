@@ -22,6 +22,10 @@ export interface Post {
   id: string;
   name: string;
   category: string;
+  categoryName?: string;
+  childCategoryName?: string;
+  brand: string;
+  brandName?: string;
   status: string;
   date: string;
   address: string;

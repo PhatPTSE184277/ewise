@@ -218,18 +218,19 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
         }
     };
 
-    const headerBgClass = useMemo(() => {
+    // Keep header background white; compute a text color based on role
+    const textColorClass = useMemo(() => {
         const role = user?.role;
-        if (!role) return 'bg-white';
+        if (!role) return 'text-primary-600';
         switch (role) {
             case 'AdminWarehouse':
-                return 'bg-primary-300';
+                return 'text-blue-600';
             case 'AdminCompany':
-                return 'bg-green-300';
+                return 'text-green-600';
             case 'RecyclingCompany':
-                return 'bg-blue-300';
+                return 'text-blue-600';
             default:
-                return 'bg-white';
+                return 'text-primary-600';
         }
     }, [user?.role]);
 
@@ -241,7 +242,7 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
         : '';
 
     return (
-        <nav className={`${headerBgClass} shadow-sm sticky top-0 z-50`}>
+        <nav className={`bg-white shadow-sm sticky top-0 z-50`}>
             <div className='max-w-full px-3 sm:px-4 md:px-6 lg:px-8'>
                 <div className='flex justify-between items-center h-14 sm:h-16'>
                     <div className='flex items-center space-x-2 sm:space-x-4 md:space-x-8'>
@@ -257,7 +258,7 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
                         )}
                         <Link
                             href={finalHref ?? '/'}
-                            className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold bg-linear-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap"
+                            className={`text-base sm:text-lg md:text-xl lg:text-2xl font-bold ${textColorClass} flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap`}
                             onClick={handleReload}
                         >
                             <Image
@@ -273,14 +274,14 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
 
                     <div className='flex items-center space-x-1.5 sm:space-x-3 md:space-x-4'>
                         {serverTime && (
-                            <span className='text-sm text-gray-600 mr-2'>
+                            <span className={`text-sm mr-2 ${textColorClass}`}>
                                 {formatTimeWithDate(serverTime, true)}
                             </span>
                         )}
                         {isAuthenticated && user && (
                             <>
                                 {user.role && (
-                                    <span className='hidden sm:inline-flex items-center text-sm text-primary-600 bg-primary-50 rounded-full px-3 py-1 font-medium mr-2 shadow-sm'>
+                                    <span className={`hidden sm:inline-flex items-center text-sm ${textColorClass} bg-primary-50 rounded-full px-3 py-1 font-medium mr-2 shadow-sm`}>
                                         Chào mừng {greetingText}
                                     </span>
                                 )}

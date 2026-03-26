@@ -68,11 +68,21 @@ const RequestShow: React.FC<RequestShowProps & { isLast?: boolean; rowIndex?: nu
                 </div>
             </td>
 
-            <td className='py-3 px-4 text-gray-700 w-[18vw]'>
-                {post.category}
+            <td className='py-3 px-4 w-[18vw]'>
+                <div
+                    className='text-gray-900 font-medium truncate'
+                    title={`${post.categoryName ?? post.category ?? 'Không rõ'} - ${post.childCategoryName ?? 'Không rõ'}`}
+                >
+                    {post.categoryName ?? post.category ?? 'Không rõ'}{' - '}{post.childCategoryName ?? 'Không rõ'}
+                </div>
             </td>
             <td className='py-3 px-4 text-gray-700 w-[28vw]'>
-                <div className='line-clamp-2 wrap-break-word'>{formatAddress(post.address) || post.address}</div>
+                <div
+                    className='line-clamp-2 wrap-break-word'
+                    title={formatAddress(post.address) || post.address}
+                >
+                    {formatAddress(post.address) || post.address}
+                </div>
             </td>
             <td className='py-3 px-4 text-sm text-gray-600 text-right w-[12vw]'>
                 {formatDate(post.date)}
