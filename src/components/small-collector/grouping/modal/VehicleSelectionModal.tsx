@@ -158,7 +158,7 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
                                             const isSelected = normalizedSelectedIds.includes(normalizedVehicleId);
                                             const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-primary-50';
                                             
-                                            return (
+                                                return (
                                                 <tr
                                                     key={normalizedVehicleId}
                                                     onClick={() => {
@@ -168,12 +168,7 @@ const VehicleSelectionModal: React.FC<VehicleSelectionModalProps> = ({
                                                     }}
                                                     className={`${
                                                         idx !== vehicles.length - 1 ? 'border-b border-gray-100' : ''
-                                                    } ${rowBg} transition-colors ${
-                                                        lockSelection
-                                                            ? 'cursor-not-allowed'
-                                                            : 'hover:bg-primary-50/40 cursor-pointer'
-                                                    }`}
-                                                >
+                                                    } ${rowBg} ${lockSelection ? 'cursor-not-allowed' : ''}`}>
                                                     <td className='py-3 px-4 text-center w-16'>
                                                         <input
                                                             type='checkbox'

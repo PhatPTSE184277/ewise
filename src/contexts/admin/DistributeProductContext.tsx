@@ -183,44 +183,56 @@ export const DistributeProductProvider: React.FC<Props> = ({ children }) => {
         setCollectionCompaniesLoading(true);
         try {
             const currentPage = pageArg ?? 1;
-            const currentLimit = limitArg ?? 9999;
-            const [response, capacityPoints] = await Promise.all([
-                getCollectionCompanies(currentPage, currentLimit),
-                getCapacityPoints().catch(() => [] as any[])
-            ]);
+            const currentLimit = limitArg ?? pageSize;
+            const response = await getCollectionCompanies(currentPage, currentLimit);
 
-            const capacityMap = new Map<string, any>();
-            if (Array.isArray(capacityPoints)) {
-                for (const cp of capacityPoints) {
-                    capacityMap.set(String(cp.id), cp);
-                }
-            }
+            const companies: any[] = response?.data
+                ? response.data
+                : Array.isArray(response)
+                    ? response
+                    : [];
 
-            const mergeCapacity = (company: any) => {
-                const cap = capacityMap.get(String(company.id));
+            // For each company shown, call /Capacity/company/{companyId} and merge capacities
+            const capacityEntries = await Promise.all(
+                companies.map(async (company) => {
+                    const companyId = String(company.id ?? '');
+                    if (!companyId) return [companyId, null] as const;
+                    try {
+                        const cap = await getCapacityPoints(companyId);
+                        return [companyId, cap] as const;
+                    } catch {
+                        return [companyId, null] as const;
+                    }
+                })
+            );
+
+            const companyCapacityMap = new Map<string, any>(capacityEntries);
+
+            const merged = companies.map((company) => {
+                const companyId = String(company.id ?? '');
+                const cap = companyCapacityMap.get(companyId);
                 if (!cap) return company;
+                const maxCapacity = cap.companyMaxCapacity;
+                const currentCapacity = cap.companyCurrentCapacity;
+                const availableCapacity = typeof maxCapacity === 'number' && typeof currentCapacity === 'number'
+                    ? Math.max(0, maxCapacity - currentCapacity)
+                    : undefined;
                 return {
                     ...company,
-                    maxCapacity: cap.maxCapacity,
-                    currentCapacity: cap.currentCapacity,
-                    availableCapacity: cap.availableCapacity
+                    maxCapacity,
+                    currentCapacity,
+                    availableCapacity
                 };
-            };
+            });
 
-            if (response && response.data) {
-                setCollectionCompanies(response.data.map(mergeCapacity));
-            } else if (Array.isArray(response)) {
-                setCollectionCompanies(response.map(mergeCapacity));
-            } else {
-                setCollectionCompanies([]);
-            }
+            setCollectionCompanies(merged);
         } catch (err) {
             console.log(err);
             setCollectionCompanies([]);
         } finally {
             setCollectionCompaniesLoading(false);
         }
-    }, []);
+    }, [pageSize]);
 
     const fetchSCPProducts = useCallback(async (smallPointId: string, workDate: string, pageArg?: number, limitArg?: number) => {
         setScpLoading(true);
