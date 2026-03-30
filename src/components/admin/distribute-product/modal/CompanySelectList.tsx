@@ -7,6 +7,7 @@ interface CompanySelectListProps {
     isSelected: boolean;
     onToggleSelect: () => void;
     isLast?: boolean;
+    disabled?: boolean;
 }
 
 const CompanySelectList: React.FC<CompanySelectListProps> = ({
@@ -14,20 +15,24 @@ const CompanySelectList: React.FC<CompanySelectListProps> = ({
     stt,
     isSelected,
     onToggleSelect,
-    isLast = false
+    isLast = false,
+    disabled = false
 }) => {
     return (
         <tr
-            className={`${!isLast ? 'border-b border-primary-100' : ''} ${isSelected ? 'bg-primary-50' : ''} odd:bg-white even:bg-primary-50`}
-            onClick={onToggleSelect}
+            className={`${!isLast ? 'border-b border-primary-100' : ''} ${isSelected ? 'bg-primary-50' : ''} odd:bg-white even:bg-primary-50 ${
+                disabled ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+            }`}
+            onClick={disabled ? undefined : onToggleSelect}
         >
             <td className='py-3 px-4 text-center w-16'>
                 <input
                     type='checkbox'
                     checked={isSelected}
-                    onChange={onToggleSelect}
+                    onChange={disabled ? undefined : onToggleSelect}
                     onClick={(e) => e.stopPropagation()}
-                    className='w-4 h-4 cursor-pointer accent-primary-600'
+                    disabled={disabled}
+                    className={`w-4 h-4 accent-primary-600 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                 />
             </td>
             <td className='py-3 px-4 text-center w-[5vw]'>

@@ -78,6 +78,16 @@ const DistributeProductPage: React.FC = () => {
     const [increasedCompanyIds, setIncreasedCompanyIds] = useState<Set<string>>(new Set());
     const [increasedSCPIds, setIncreasedSCPIds] = useState<Set<string>>(new Set());
 
+    const lockedCompanyId = React.useMemo(() => {
+        const normalizeText = (v: any) => String(v ?? '').trim().toLowerCase();
+        const locked = (collectionCompanies || []).find((c: any) => {
+            const email = normalizeText(c?.companyEmail);
+            const name = normalizeText(c?.name);
+            return email === 'contact@ewise.vn' || name === 'ewise express';
+        });
+        return locked?.id ? String(locked.id) : undefined;
+    }, [collectionCompanies]);
+
     // Handle sessionStorage params from notification (no URL params)
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -250,6 +260,9 @@ const DistributeProductPage: React.FC = () => {
     };
 
     const handleToggleSelectCompany = (companyId: string) => {
+        if (lockedCompanyId && String(companyId) === lockedCompanyId) {
+            return;
+        }
         setSelectedCompanyIds(prev => 
             prev.includes(companyId) 
                 ? prev.filter(id => id !== companyId)
@@ -258,22 +271,35 @@ const DistributeProductPage: React.FC = () => {
     };
 
     const handleToggleSelectAllCompanies = () => {
-        if (selectedCompanyIds.length === collectionCompanies.length) {
-            setSelectedCompanyIds([]);
-        } else {
-            setSelectedCompanyIds(collectionCompanies.map(c => c.id));
+        const allIds = (collectionCompanies || []).map((c: any) => String(c.id));
+        const allSelected = allIds.length > 0 && allIds.every((id) => selectedCompanyIds.includes(id));
+
+        if (allSelected) {
+            setSelectedCompanyIds(lockedCompanyId ? [lockedCompanyId] : []);
+            return;
         }
+
+        setSelectedCompanyIds(
+            lockedCompanyId ? Array.from(new Set([...allIds, lockedCompanyId])) : allIds
+        );
     };
 
     // Auto-select all companies when modal opens
     React.useEffect(() => {
         if (showDistributeModal && collectionCompanies.length > 0) {
-            setSelectedCompanyIds(collectionCompanies.map(c => c.id));
+            const allIds = (collectionCompanies || []).map((c: any) => String(c.id));
+            setSelectedCompanyIds(
+                lockedCompanyId ? Array.from(new Set([...allIds, lockedCompanyId])) : allIds
+            );
         }
-    }, [showDistributeModal, collectionCompanies]);
+    }, [showDistributeModal, collectionCompanies, lockedCompanyId]);
 
     const handleCompanySelectionConfirm = async (companyIds: string[]) => {
-        if (companyIds.length === 0 || undistributedCount === 0) return;
+        const finalCompanyIds = lockedCompanyId
+            ? Array.from(new Set([...(companyIds || []), lockedCompanyId]))
+            : companyIds;
+
+        if (finalCompanyIds.length === 0 || undistributedCount === 0) return;
         
         setShowDistributeModal(false);
         setDistributing(true);
@@ -315,12 +341,12 @@ const DistributeProductPage: React.FC = () => {
         setActiveFilter('distributed');
         
         try {
-            console.log('📦 Distributing', selectedProductIds.length, 'products to', companyIds.length, 'companies');
+            console.log('📦 Distributing', selectedProductIds.length, 'products to', finalCompanyIds.length, 'companies');
             
             await distributeProductsToDate({ 
                 workDate: dateToProcess, 
                 productIds: selectedProductIds,
-                targetCompanyIds: companyIds.length > 0 ? companyIds : undefined
+                targetCompanyIds: finalCompanyIds.length > 0 ? finalCompanyIds : undefined
             });
             await fetchCompanies(dateToProcess);
             // Navigate to admin dashboard after successful distribution

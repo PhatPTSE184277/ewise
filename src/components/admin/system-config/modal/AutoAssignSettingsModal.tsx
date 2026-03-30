@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import CustomNumberInput from '@/components/ui/CustomNumberInput';
+import CustomTimePicker from '@/components/ui/CustomTimePicker';
 import { AutoAssignSettings } from '@/services/admin/SystemConfigService';
 
 interface AutoAssignSettingsModalProps {
@@ -36,7 +37,7 @@ const AutoAssignSettingsModal: React.FC<AutoAssignSettingsModalProps> = ({
 
     return (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
-            <div className='absolute inset-0 bg-black/30 backdrop-blur-sm' onClick={onClose}></div>
+            <div className='absolute inset-0 bg-black/30 backdrop-blur-sm'></div>
 
             <div className='relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn'>
                 <div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
@@ -79,11 +80,10 @@ const AutoAssignSettingsModal: React.FC<AutoAssignSettingsModalProps> = ({
                         <div className='bg-gray-50 rounded-xl border border-gray-100 p-4'>
                             <div className='text-sm font-semibold text-gray-700'>Schedule Time</div>
                             <div className='text-xs text-gray-500 mb-2'>Giờ chạy (HH:mm)</div>
-                            <input
-                                type='time'
+                            <CustomTimePicker
                                 value={value.scheduleTime}
-                                onChange={(e) => onChange({ ...value, scheduleTime: e.target.value })}
-                                className='w-full px-3 py-2 border border-primary-200 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent'
+                                onChange={(t) => onChange({ ...value, scheduleTime: t })}
+                                dropdownAlign='right'
                             />
                         </div>
 
@@ -102,17 +102,6 @@ const AutoAssignSettingsModal: React.FC<AutoAssignSettingsModalProps> = ({
 
                 <div className='flex justify-end items-center gap-3 p-5 border-t border-primary-100 bg-white'>
                     <button
-                        onClick={onClose}
-                        disabled={loading}
-                        className={`px-4 py-2 rounded-lg font-medium transition ${
-                            !loading
-                                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`}
-                    >
-                        Huỷ
-                    </button>
-                    <button
                         onClick={handleConfirm}
                         disabled={loading}
                         className={`px-4 py-2 rounded-lg font-medium transition ${
@@ -121,7 +110,7 @@ const AutoAssignSettingsModal: React.FC<AutoAssignSettingsModalProps> = ({
                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                     >
-                        {loading ? 'Đang lưu...' : 'Lưu'}
+                        {loading ? <Loader2 className='animate-spin' size={18} /> : 'Xác nhận'}
                     </button>
                 </div>
 

@@ -81,6 +81,24 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
             ? preAssignDeadlineMessage
             : undefined;
 
+    const sanitizeDeadlineSummaryMessageForDisplay = (message?: string) => {
+        const raw = String(message || '').trim();
+        if (!raw) return undefined;
+
+        const colonIndex = raw.indexOf(':');
+        if (colonIndex === -1) return raw;
+
+        const afterColon = raw.slice(colonIndex + 1);
+        const hasPlateNumber = /\b\d{2}[A-Z]{1,2}-\d{3,5}(?:\.\d{2})?\b/i.test(afterColon);
+        if (!hasPlateNumber) return raw;
+
+        return raw.slice(0, colonIndex).trim();
+    };
+
+    const deadlineSummaryMessageForDisplay = sanitizeDeadlineSummaryMessageForDisplay(
+        deadlineSummaryMessage
+    );
+
     const parseSuggestedAdditionalVehicleCount = (): number => {
         const suggestion = preAssignResult?.criticalGapSuggestion;
         if (!suggestion) return 0;
@@ -562,7 +580,7 @@ const AssignDayStep: React.FC<AssignDayStepProps> = ({
                 selectedReason={selectedUnassignedReason}
                 onReasonChange={handleUnassignedReasonChange}
                 deadlineUnassignedCount={deadlineUnassignedCount}
-                summaryMessage={deadlineSummaryMessage}
+                summaryMessage={deadlineSummaryMessageForDisplay}
                 onAddRemainingVehicles={handleOpenAddVehicleModal}
                 addVehiclesLoading={loadingRemainingVehicles}
             />

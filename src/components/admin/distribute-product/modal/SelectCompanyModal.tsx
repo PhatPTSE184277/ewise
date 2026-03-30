@@ -33,8 +33,22 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
 }) => {
     if (!open) return null;
 
-    const allSelected = companies.length > 0 && companies.every(c => selectedCompanyIds.includes(c.id));
-    const hasSelection = selectedCompanyIds.length > 0;
+    const normalizeText = (v: any) => String(v ?? '').trim().toLowerCase();
+    const isLockedCompany = (company: any) => {
+        const email = normalizeText(company?.companyEmail);
+        const name = normalizeText(company?.name);
+        return email === 'contact@ewise.vn' || name === 'ewise express';
+    };
+
+    const lockedCompanyId = companies.find((c) => isLockedCompany(c))?.id;
+    const effectiveSelectedCompanyIds = lockedCompanyId
+        ? Array.from(new Set([...(selectedCompanyIds || []), String(lockedCompanyId)]))
+        : selectedCompanyIds;
+
+    const allSelected =
+        companies.length > 0 &&
+        companies.every((c) => isLockedCompany(c) || effectiveSelectedCompanyIds.includes(String(c.id)));
+    const hasSelection = effectiveSelectedCompanyIds.length > 0;
 
     return (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
@@ -127,16 +141,25 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                                                         </tr>
                                                     ))
                                                 ) : companies.length > 0 ? (
-                                                    companies.map((company, idx) => (
-                                                        <CompanySelectList
-                                                            key={company.id}
-                                                            company={company}
-                                                            stt={idx + 1}
-                                                            isSelected={selectedCompanyIds.includes(company.id)}
-                                                            onToggleSelect={() => onToggleSelect(company.id)}
-                                                            isLast={idx === companies.length - 1}
-                                                        />
-                                                    ))
+                                                    companies.map((company, idx) => {
+                                                        const companyId = String(company.id);
+
+                                                        return (
+                                                            <CompanySelectList
+                                                                key={companyId}
+                                                                company={company}
+                                                                stt={idx + 1}
+                                                                isSelected={
+                                                                    isLockedCompany(company)
+                                                                        ? true
+                                                                        : effectiveSelectedCompanyIds.includes(companyId)
+                                                                }
+                                                                disabled={isLockedCompany(company)}
+                                                                onToggleSelect={() => onToggleSelect(companyId)}
+                                                                isLast={idx === companies.length - 1}
+                                                            />
+                                                        );
+                                                    })
                                                 ) : (
                                                     <tr>
                                                         <td colSpan={7} className='text-center py-8 text-gray-400'>
@@ -158,13 +181,13 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                     <div>
                         {hasSelection ? (
                             <span className='text-sm font-medium text-primary-700'>
-                                Đã chọn {selectedCompanyIds.length} công ty
+                                Đã chọn {effectiveSelectedCompanyIds.length} công ty
                             </span>
                         ) : null}
                     </div>
                     <div>
                         <button
-                            onClick={() => onConfirm(selectedCompanyIds)}
+                            onClick={() => onConfirm(effectiveSelectedCompanyIds)}
                             disabled={!hasSelection || distributing || productCount === 0}
                             className='px-6 py-2.5 text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition flex items-center justify-center gap-2 min-w-[140px] cursor-pointer'
                         >
