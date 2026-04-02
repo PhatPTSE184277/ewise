@@ -18,6 +18,7 @@ import { SendNotiProvider } from '@/contexts/admin/SendNotiContext';
 import { SpeedProvider } from '@/contexts/admin/SpeedContext';
 import { CapacityProvider } from '@/contexts/admin/CapacityContext';
 import { VoucherProvider } from '@/contexts/admin/VoucherContext';
+import { CategoryProvider } from '@/contexts/admin/CategoryContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 
 function AdminLayoutContent({ children, sidebarOpen, setSidebarOpen }: { children: React.ReactNode; sidebarOpen: boolean; setSidebarOpen: (open: boolean) => void }) {
@@ -88,15 +89,17 @@ export default function AdminLayout({
                                     <CollectionCompanyProvider>
                                         <SystemConfigProvider>
                                             <TrackingProvider>
-                                                <DashboardProvider>
-                                                    <CapacityProvider>
-                                                        <VoucherProvider>
-                                                            <AdminLayoutContent sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-                                                                {children}
-                                                            </AdminLayoutContent>
-                                                        </VoucherProvider>
-                                                    </CapacityProvider>
-                                                </DashboardProvider>
+                                                <CategoryProvider>
+                                                    <DashboardProvider>
+                                                        <CapacityProvider>
+                                                            <VoucherProvider>
+                                                                <AdminLayoutContent sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+                                                                    {children}
+                                                                </AdminLayoutContent>
+                                                            </VoucherProvider>
+                                                        </CapacityProvider>
+                                                    </DashboardProvider>
+                                                </CategoryProvider>
                                             </TrackingProvider>
                                         </SystemConfigProvider>
                                     </CollectionCompanyProvider>

@@ -6,11 +6,15 @@ import {
     Package,
     ClipboardList,
     Wrench,
+    Layers,
     Zap,
     Recycle,
     Bell,
     TicketPercent,
-    ScanSearch
+    ScanSearch,
+	CalendarDays
+	,
+	Flag
 } from 'lucide-react';
 
 export const adminMenuItems = [
@@ -39,6 +43,12 @@ export const adminMenuItems = [
         icon: <Recycle size={20} />
     },
     {
+        id: 'category',
+        label: 'Danh mục',
+        path: '/admin/category',
+        icon: <Layers size={20} />
+    },
+    {
         id: 'company',
         label: 'Công ty',
         path: '/admin/company',
@@ -55,6 +65,18 @@ export const adminMenuItems = [
         label: 'Cấu hình hệ thống',
         path: '/admin/system-config',
         icon: <Settings size={20} />
+    },
+    {
+        id: 'holiday',
+        label: 'Ngày nghỉ lễ',
+        path: '/admin/holiday',
+        icon: <CalendarDays size={20} />
+    },
+    {
+        id: 'report',
+        label: 'Báo cáo',
+        path: '/admin/report',
+        icon: <Flag size={20} />
     },
     {
         id: 'tracking',

@@ -144,7 +144,7 @@ const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
             ? createPortal(
                   <div
                       ref={dropdownRef}
-                      className='fixed bg-white border border-primary-100 rounded-xl overflow-hidden z-[60] animate-slide-up shadow-2xl'
+                      className='fixed bg-white border border-primary-100 rounded-xl overflow-hidden z-60 animate-slide-up shadow-2xl'
                       style={{
                           top: dropdownTop,
                           left: dropdownLeft,

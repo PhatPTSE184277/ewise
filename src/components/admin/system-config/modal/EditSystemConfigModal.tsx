@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Settings, X } from 'lucide-react';
 import { SystemConfig } from '@/services/admin/SystemConfigService';
 import CustomNumberInput from '@/components/ui/CustomNumberInput';
+import CustomTimePicker from '@/components/ui/CustomTimePicker';
 import SummaryCard from '@/components/ui/SummaryCard';
 
 interface EditSystemConfigModalProps {
@@ -20,20 +21,33 @@ const EditSystemConfigModal: React.FC<EditSystemConfigModalProps> = ({
     config
 }) => {
     const [value, setValue] = useState<number>(0);
+    const [timeValue, setTimeValue] = useState<string>('');
     const [file, setFile] = useState<File | null>(null);
     const [isUrl, setIsUrl] = useState(false);
+    const [isTime, setIsTime] = useState(false);
 
     useEffect(() => {
         if (open && config) {
             const isUrlConfig = config.value?.startsWith('http://') || config.value?.startsWith('https://');
             const shouldBeUrl = isUrlConfig || config.key.toLowerCase().includes('url') || config.key.toLowerCase().includes('file');
-            if (isUrl !== shouldBeUrl) setIsUrl(shouldBeUrl);
 
-            if (!shouldBeUrl) {
+            const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+            const looksLikeTime = Boolean(config.value && timeRegex.test(String(config.value)));
+            const keyHintsForTime = ['time', 'hour', 'gio', 'thoi gian', 'thời gian'];
+            const keyLower = config.key?.toLowerCase() || '';
+            const shouldBeTime = looksLikeTime || keyHintsForTime.some((k) => keyLower.includes(k));
+
+            if (isUrl !== shouldBeUrl) setIsUrl(shouldBeUrl);
+            if (isTime !== shouldBeTime) setIsTime(shouldBeTime);
+
+            if (shouldBeTime) {
+                setTimeValue(String(config.value ?? ''));
+            } else if (!shouldBeUrl) {
                 const num = Number(config.value);
                 const newValue = !isNaN(num) ? num : 0;
                 if (value !== newValue) setValue(newValue);
             }
+
             setFile(null);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,6 +57,8 @@ const EditSystemConfigModal: React.FC<EditSystemConfigModalProps> = ({
         if (config) {
             if (isUrl && file) {
                 onConfirm(config.systemConfigId, null, file);
+            } else if (isTime) {
+                onConfirm(config.systemConfigId, String(timeValue), null);
             } else {
                 onConfirm(config.systemConfigId, String(value), null);
             }
@@ -119,6 +135,18 @@ const EditSystemConfigModal: React.FC<EditSystemConfigModalProps> = ({
                                         </div>
                                     )
                                 }
+                                : isTime
+                                ? {
+                                    icon: <span className="w-6 h-6 flex items-center justify-center rounded-full bg-primary-50 border border-primary-200"><Settings className="w-4 h-4 text-primary-500" /></span>,
+                                    label: 'Giá trị',
+                                    value: (
+                                        <CustomTimePicker
+                                            value={timeValue}
+                                            onChange={setTimeValue}
+                                            placeholder='Chọn giờ'
+                                        />
+                                    )
+                                }
                                 : {
                                     icon: <span className="w-6 h-6 flex items-center justify-center rounded-full bg-primary-50 border border-primary-200"><Settings className="w-4 h-4 text-primary-500" /></span>,
                                     label: 'Giá trị',
@@ -139,9 +167,9 @@ const EditSystemConfigModal: React.FC<EditSystemConfigModalProps> = ({
                 <div className='flex justify-end items-center gap-3 p-5 border-t border-primary-100 bg-white'>
                     <button
                         onClick={handleConfirm}
-                        disabled={isUrl ? !file : (value === 0 || isNaN(value))}
+                        disabled={isUrl ? !file : isTime ? !timeValue : (value === 0 || isNaN(value))}
                         className={`px-5 py-2 rounded-lg font-medium text-white cursor-pointer shadow-md transition-all duration-200 ${
-                            (isUrl ? file : (value !== 0 && !isNaN(value)))
+                            (isUrl ? file : isTime ? timeValue : (value !== 0 && !isNaN(value)))
                                 ? 'bg-primary-600 hover:bg-primary-700'
                                 : 'bg-gray-300 cursor-not-allowed'
                         } flex items-center gap-2`}

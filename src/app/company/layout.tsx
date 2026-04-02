@@ -27,7 +27,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 <Header 
                     title={headerTitle} 
                     href="/large-collector/dashboard" 
-                    profileHref="/employee/profile" 
+                    profileHref="/company/profile" 
                 />
                 <div className='flex flex-1 overflow-hidden'>
                     <Sidebar menuItems={MenuItems} />

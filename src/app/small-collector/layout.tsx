@@ -29,7 +29,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 <Header
                     title={headerTitle}
                     href='/small-collector/dashboard'
-                    profileHref='/employee/profile'
+                    profileHref='/small-collector/profile'
                 />
                 <div className='flex flex-1 overflow-hidden'>
                     <Sidebar
