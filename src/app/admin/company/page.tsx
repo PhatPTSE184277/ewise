@@ -139,30 +139,6 @@ const CompanyPage: React.FC = () => {
                     </h1>
                 </div>
                 <div className='flex gap-4 items-center flex-1 justify-end'>
-                    <div className='flex items-center gap-2 mr-4'>
-                        <span className='text-xs text-gray-500 font-semibold mr-2 hidden sm:inline'>Loại:</span>
-                        <button
-                            onClick={() => handleTypeChange('Công ty thu gom')}
-                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer min-w-[120px] ${
-                                type === 'Công ty thu gom'
-                                    ? 'bg-primary-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                        >
-                            Công ty thu gom
-                        </button>
-                        <button
-                            onClick={() => handleTypeChange('Công ty tái chế')}
-                            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer min-w-[120px] ${
-                                type === 'Công ty tái chế'
-                                    ? 'bg-primary-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                        >
-                            Công ty tái chế
-                        </button>
-                    </div>
-
                     {user?.role !== 'Collector' && (
                         <>
                             <a
@@ -197,7 +173,9 @@ const CompanyPage: React.FC = () => {
             {/* Filter trạng thái */}
             <CompanyFilter
                 status={status}
+                type={type}
                 onStatusChange={handleStatusChange}
+                onTypeChange={handleTypeChange}
             />
 
 

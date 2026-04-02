@@ -33,6 +33,7 @@ const AdminReportPage: React.FC = () => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [reports, setReports] = useState<ReportItem[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [dataKey, setDataKey] = useState('');
 	const [error, setError] = useState<string | null>(null);
 
 	const [detailOpen, setDetailOpen] = useState(false);
@@ -48,18 +49,30 @@ const AdminReportPage: React.FC = () => {
 
 	const tableScrollRef = useRef<HTMLDivElement>(null);
 
+	const currentKey = useMemo(
+		() => `${type}|${status}|${startDate}|${endDate}|${page}|${limit}`,
+		[type, status, startDate, endDate, page, limit]
+	);
+
+	const effectiveLoading = loading || dataKey !== currentKey;
+
 	useEffect(() => {
 		const loadTypes = async () => {
 			try {
 				const data = await ReportService.getReportTypes();
 				const list = Array.isArray(data) ? data : [];
 				setTypes(list);
-				if (list.length > 0 && !type) {
-					setType(list[0]);
+				if (list.length > 0) {
+					const selected = !type || !list.includes(type) ? list[0] : type;
+					if (selected !== type) {
+						setType(selected);
+					}
 					setPage(1);
 				}
 			} catch {
 				setTypes([]);
+				// stop skeleton if types cannot be loaded
+				setDataKey((prev) => (prev ? prev : currentKey));
 			}
 		};
 
@@ -68,6 +81,7 @@ const AdminReportPage: React.FC = () => {
 	}, []);
 
 	const fetchReports = useCallback(async () => {
+		const requestKey = `${type}|${status}|${startDate}|${endDate}|${page}|${limit}`;
 		setLoading(true);
 		setError(null);
 		try {
@@ -82,18 +96,21 @@ const AdminReportPage: React.FC = () => {
 
 			setReports(Array.isArray(res?.data) ? res.data : []);
 			setTotalPages(Number(res?.totalPages || 1));
+			setDataKey(requestKey);
 		} catch {
 			setError('Không thể tải danh sách báo cáo');
 			setReports([]);
 			setTotalPages(1);
+			setDataKey(requestKey);
 		} finally {
 			setLoading(false);
 		}
 	}, [page, limit, type, status, startDate, endDate]);
 
 	useEffect(() => {
+		if (!type) return;
 		void fetchReports();
-	}, [fetchReports]);
+	}, [fetchReports, type]);
 
 	const handlePageChange = (newPage: number) => {
 		setPage(newPage);
@@ -177,23 +194,6 @@ const AdminReportPage: React.FC = () => {
 					</div>
 				</div>
 				<div className='flex items-center gap-4 flex-1 justify-end max-w-3xl'>
-					<div className='flex items-center gap-2 mr-2'>
-						<span className='text-xs text-gray-500 font-semibold mr-2 hidden sm:inline'>Loại:</span>
-						{(types || []).map((t) => (
-							<button
-								key={t}
-								onClick={() => {
-									setType(t);
-									setPage(1);
-								}}
-								className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer min-w-[120px] ${
-									type === t ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-								}`}
-							>
-								{t}
-							</button>
-						))}
-					</div>
 					<div className='min-w-fit'>
 						<CustomDateRangePicker
 							fromDate={startDate}
@@ -208,11 +208,16 @@ const AdminReportPage: React.FC = () => {
 							}}
 						/>
 					</div>
-					
 				</div>
 			</div>
 
 			<ReportFilter
+				types={types}
+				type={type}
+				onTypeChange={(t) => {
+					setType(t);
+					setPage(1);
+				}}
 				status={status}
 				onStatusChange={(v) => {
 					setStatus(v);
@@ -225,7 +230,7 @@ const AdminReportPage: React.FC = () => {
 			) : null}
 
 			<div className='mb-2' ref={tableScrollRef}>
-				<ReportList reports={rows} loading={loading} page={page} limit={limit} onView={handleView} />
+				<ReportList reports={rows} loading={effectiveLoading} page={page} limit={limit} onView={handleView} />
 			</div>
 
 			<Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />

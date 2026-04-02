@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { X } from 'lucide-react';
+import { X, User, Flag, Tag, Calendar, Building2, MapPin } from 'lucide-react';
 import CustomTextarea from '@/components/ui/CustomTextarea';
+import SummaryCard from '@/components/ui/SummaryCard';
 import { formatDate } from '@/utils/FormatDate';
 import type { ReportItem } from '@/services/admin/ReportService';
 
@@ -30,6 +31,18 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 		return msg.length > 0;
 	}, [report?.answerMessage]);
 
+	const summaryItems = useMemo(() => {
+		if (!report) return [];
+		return [
+			{ icon: <User size={18} className='text-primary-600' />, label: 'Người báo cáo', value: report.reportUserName || 'N/A' },
+			{ icon: <Flag size={18} className='text-primary-600' />, label: 'Trạng thái', value: report.status || '' },
+			{ icon: <Tag size={18} className='text-primary-600' />, label: 'Loại', value: report.reportType || '' },
+			{ icon: <Calendar size={18} className='text-primary-600' />, label: 'Ngày tạo', value: formatDate(report.createdAt || '') },
+			{ icon: <Building2 size={18} className='text-primary-600' />, label: 'Công ty', value: report.companyName || '' },
+			{ icon: <MapPin size={18} className='text-primary-600' />, label: 'Điểm thu gom', value: report.smallCollectionPointName || '' },
+		];
+	}, [report]);
+
 	const canAnswer = Boolean(report?.reportId) && !isAnswered;
 
 	const handleClose = () => {
@@ -55,7 +68,6 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 				<div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
 					<div>
 						<h2 className='text-2xl font-bold text-gray-800'>Chi tiết báo cáo</h2>
-						<p className='text-sm text-gray-600 mt-1'>Xem thông tin và trả lời báo cáo</p>
 					</div>
 					<button
 						onClick={handleClose}
@@ -74,32 +86,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 						<div className='text-sm text-gray-500'>Không có dữ liệu</div>
 					) : (
 						<>
-							<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-								<div className='p-4 rounded-xl border border-primary-100 bg-primary-50'>
-									<div className='text-xs text-gray-500'>Người báo cáo</div>
-									<div className='text-sm font-semibold text-gray-900'>{report.reportUserName || 'N/A'}</div>
-								</div>
-								<div className='p-4 rounded-xl border border-primary-100 bg-primary-50'>
-									<div className='text-xs text-gray-500'>Trạng thái</div>
-									<div className='text-sm font-semibold text-gray-900'>{report.status || ''}</div>
-								</div>
-								<div className='p-4 rounded-xl border border-primary-100 bg-primary-50'>
-									<div className='text-xs text-gray-500'>Loại</div>
-									<div className='text-sm font-semibold text-gray-900'>{report.reportType || ''}</div>
-								</div>
-								<div className='p-4 rounded-xl border border-primary-100 bg-primary-50'>
-									<div className='text-xs text-gray-500'>Ngày tạo</div>
-									<div className='text-sm font-semibold text-gray-900'>{formatDate(report.createdAt || '')}</div>
-								</div>
-								<div className='p-4 rounded-xl border border-primary-100 bg-primary-50'>
-									<div className='text-xs text-gray-500'>Công ty</div>
-									<div className='text-sm font-semibold text-gray-900'>{report.companyName || ''}</div>
-								</div>
-								<div className='p-4 rounded-xl border border-primary-100 bg-primary-50'>
-									<div className='text-xs text-gray-500'>Điểm thu gom</div>
-									<div className='text-sm font-semibold text-gray-900'>{report.smallCollectionPointName || ''}</div>
-								</div>
-							</div>
+							<SummaryCard items={summaryItems} />
 
 							<div className='p-4 rounded-xl border border-primary-100 bg-white'>
 								<div className='text-xs text-gray-500 mb-1'>Mô tả</div>

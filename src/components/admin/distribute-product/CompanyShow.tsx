@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Eye } from 'lucide-react';
 import { formatNumber } from '@/utils/formatNumber';
 
 interface CompanyShowProps {
@@ -22,10 +22,7 @@ const CompanyShow: React.FC<CompanyShowProps> = ({
     const isCustomer = !!company.isCustomer || /ute/i.test(company.companyName ?? '');
 
     return (
-        <tr
-            className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg} cursor-pointer`}
-            onClick={onSelect}
-        >
+        <tr className={`${!isLast ? 'border-b border-primary-100' : ''} ${rowBg}`}>
             <td className='py-3 px-4 text-center w-[6vw]'>
                 <span className='inline-flex min-w-7 h-7 rounded-full bg-primary-600 text-white text-sm items-center justify-center font-semibold mx-auto px-2'>
                     {formatNumber(index + 1)}
@@ -54,6 +51,21 @@ const CompanyShow: React.FC<CompanyShowProps> = ({
                     <span className='text-gray-900 font-medium'>
                         {total}
                     </span>
+                </div>
+            </td>
+            <td className='py-3 px-4 w-[10vw]'>
+                <div className='flex items-center justify-center'>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onSelect();
+                        }}
+                        className='text-primary-600 hover:text-primary-800 flex items-center gap-1 font-medium transition cursor-pointer'
+                        title='Xem kho và sản phẩm'
+                        aria-label='Xem kho và sản phẩm'
+                    >
+                        <Eye size={16} />
+                    </button>
                 </div>
             </td>
         </tr>
