@@ -1,6 +1,5 @@
 import React from 'react';
 import { IoFilterOutline } from 'react-icons/io5';
-import SearchableSelect from '@/components/ui/SearchableSelect';
 
 interface OptionItem { value: string; label: string }
 
@@ -20,12 +19,6 @@ const SystemConfigFilter: React.FC<SystemConfigFilterProps> = ({
   groupNames,
   groupName,
   onFilterChange,
-  scpOptions,
-  selectedScpName,
-  onScpChange,
-  companyOptions,
-  selectedCompanyName,
-  onCompanyChange
 }) => {
   return (
     <div className='bg-white rounded-2xl shadow border border-gray-100 px-3 py-3 mb-6'>
@@ -47,33 +40,7 @@ const SystemConfigFilter: React.FC<SystemConfigFilterProps> = ({
           ))}
         </div>
 
-        <div className='flex items-center gap-3'>
-          {scpOptions && onScpChange && (
-            <div className='w-64'>
-              <SearchableSelect
-                options={scpOptions}
-                value={selectedScpName}
-                onChange={(v) => onScpChange(String(v))}
-                getLabel={(o: any) => o.label}
-                getValue={(o: any) => o.value}
-                placeholder='Chọn kho...'
-              />
-            </div>
-          )}
-
-          {companyOptions && onCompanyChange && (
-            <div className='w-64'>
-              <SearchableSelect
-                options={companyOptions}
-                value={selectedCompanyName}
-                onChange={(v) => onCompanyChange(String(v))}
-                getLabel={(o: any) => o.label}
-                getValue={(o: any) => o.value}
-                placeholder='Chọn công ty...'
-              />
-            </div>
-          )}
-        </div>
+        <div className='flex items-center gap-3'></div>
       </div>
     </div>
   );

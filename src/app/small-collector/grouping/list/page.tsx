@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import GroupingListComponent from '@/components/small-collector/grouping/list/GroupingList';
 
 import Pagination from '@/components/ui/Pagination';
+import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import GroupingDetail from '@/components/small-collector/grouping/list/modal/GroupingDetail';
 import ReassignDriverModal from '@/components/small-collector/grouping/list/modal/ReassignDriverModal';
 import { useGroupingContext } from '@/contexts/small-collector/GroupingContext';
@@ -21,7 +22,9 @@ const GroupingListPage: React.FC = () => {
         groupDetail,
         groupsPage,
         groupsTotalPage,
-        setGroupsPage
+        setGroupsPage,
+        groupsDate,
+        setGroupsDate
     } = useGroupingContext();
     const [search] = useState('');
     const [selectedGrouping, setSelectedGrouping] = useState<any | null>(null);
@@ -30,8 +33,8 @@ const GroupingListPage: React.FC = () => {
 
     // Fetch groups on mount
     useEffect(() => {
-        fetchGroups(groupsPage);
-    }, [fetchGroups, groupsPage]);
+        fetchGroups(groupsPage, 10, groupsDate);
+    }, [fetchGroups, groupsPage, groupsDate]);
 
     const filteredGroupings = groups.filter((group: any) => {
         const matchSearch =
@@ -43,6 +46,11 @@ const GroupingListPage: React.FC = () => {
 
     const handlePageChange = (page: number) => {
         setGroupsPage(page);
+    };
+
+    const handleDateChange = (date: string) => {
+        setGroupsDate(date);
+        setGroupsPage(1);
     };
 
     const handleCreateNew = () => {
@@ -71,13 +79,22 @@ const GroupingListPage: React.FC = () => {
                         Danh sách nhóm thu gom
                     </h1>
                 </div>
-                <button
-                    onClick={handleCreateNew}
-                    className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors cursor-pointer'
-                >
-                    <Plus size={20} />
-                    Tạo nhóm mới
-                </button>
+                <div className='flex items-center gap-3'>
+                    <div className='min-w-fit'>
+                        <CustomDatePicker
+                            value={groupsDate}
+                            onChange={handleDateChange}
+                            placeholder='Chọn ngày thu gom'
+                        />
+                    </div>
+                    <button
+                        onClick={handleCreateNew}
+                        className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors cursor-pointer'
+                    >
+                        <Plus size={20} />
+                        Tạo nhóm mới
+                    </button>
+                </div>
             </div>
 
             {/* List */}

@@ -135,10 +135,14 @@ export interface GroupingPageResponse {
 export const getGroupsByCollectionPointId = async (
     collectionPointId: string,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
+    date?: string
 ): Promise<GroupListPagingResponse> => {
+    const params: Record<string, any> = { page, limit };
+    if (date) params.date = date;
+
     const response = await axios.get(`/grouping/groups/${collectionPointId}`, {
-        params: { page, limit }
+        params
     });
     return response.data;
 };

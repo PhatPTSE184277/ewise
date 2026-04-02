@@ -96,7 +96,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({ open, categor
                             <h2 className='text-xl font-bold text-gray-800 truncate' title={title}>
                                 {title}
                             </h2>
-                            <div className='text-sm text-gray-500'>Trạng thái: {category.status || 'N/A'}</div>
+                            <div className='text-sm text-gray-500'>Trạng thái: {category.status || 'Không có'}</div>
                         </div>
                     </div>
                     <button
@@ -118,7 +118,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({ open, categor
                         >
                             <div className='flex items-center gap-2'>
                                 <Tag size={18} />
-                                <span>Brand</span>
+                                <span>Thương hiệu</span>
                                 <span className='text-sm text-gray-500'>({brandTotalItems || brands.length})</span>
                             </div>
                             {activeTab === 'brands' && (
@@ -134,7 +134,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({ open, categor
                         >
                             <div className='flex items-center gap-2'>
                                 <Ruler size={18} />
-                                <span>Attribute</span>
+                                <span>Thuộc tính</span>
                                 <span className='text-sm text-gray-500'>({attributes.length})</span>
                             </div>
                             {activeTab === 'attributes' && (
@@ -177,7 +177,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({ open, categor
                                         </tbody>
                                     </table>
                                 ) : (
-                                    <div className='px-4 py-8 text-center text-gray-400'>Không có brand</div>
+                                    <div className='px-4 py-8 text-center text-gray-400'>Không có thương hiệu</div>
                                 )}
 
                                 <Pagination
@@ -193,8 +193,8 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({ open, categor
                                         <thead className='bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-100'>
                                             <tr>
                                                 <th className='py-3 px-4 text-left'>Tên</th>
-                                                <th className='py-3 px-4 text-right w-[110px]'>Min</th>
-                                                <th className='py-3 px-4 text-right w-[110px]'>Max</th>
+                                                <th className='py-3 px-4 text-right w-[110px]'>Tối thiểu</th>
+                                                <th className='py-3 px-4 text-right w-[110px]'>Tối đa</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -215,7 +215,7 @@ const CategoryDetailModal: React.FC<CategoryDetailModalProps> = ({ open, categor
                                         </tbody>
                                     </table>
                                 ) : (
-                                    <div className='px-4 py-8 text-center text-gray-400'>Không có attribute</div>
+                                    <div className='px-4 py-8 text-center text-gray-400'>Không có thuộc tính</div>
                                 )}
                             </div>
                         )}

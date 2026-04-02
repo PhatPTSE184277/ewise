@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatNumber } from '@/utils/formatNumber';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface CompanySelectListProps {
@@ -25,10 +26,23 @@ const CompanySelectList: React.FC<CompanySelectListProps> = ({
     const formatM3 = (value: any) => {
         const num = Number(value);
         if (!Number.isFinite(num)) return '0';
-        return num.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+        return formatNumber(num, { locale: 'vi-VN', maximumFractionDigits: 0, minimumFractionDigits: 0 });
     };
 
-    const warehouses = Array.isArray(company?.warehouses) ? company.warehouses : [];
+    const warehouses = Array.isArray(company?.warehouses)
+        ? company.warehouses
+        : [];
+    const activePoints = Array.isArray(company?.activePoints)
+        ? company.activePoints
+        : [];
+    const activePointSet = new Set(
+        activePoints.map((point: any) => String(point ?? '').trim().toLowerCase())
+    );
+    const visibleWarehouses = activePointSet.size
+        ? warehouses.filter((warehouse: any) =>
+              activePointSet.has(String(warehouse?.name ?? '').trim().toLowerCase())
+          )
+        : [];
 
     return (
         <>
@@ -55,59 +69,96 @@ const CompanySelectList: React.FC<CompanySelectListProps> = ({
                 <td className='py-3 px-4 w-[22vw]'>
                     <div className='flex items-start justify-between gap-2'>
                         <div>
-                            <div className='text-gray-900 font-medium'>{company.companyName || company.name || 'N/A'}</div>
-                            <div className='text-xs text-gray-500 mt-1'>{company.companyId || company.id || ''}</div>
+                            <div className='text-gray-900 font-medium'>
+                                {company.companyName || company.name || 'N/A'}
+                            </div>
                         </div>
-                        <button
-                            type='button'
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onToggleExpand();
-                            }}
-                            className='mt-0.5 p-1 rounded-md hover:bg-primary-100 text-primary-600 cursor-pointer'
-                            aria-label='Xem kho chi tiết'
-                        >
-                            {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                        </button>
+                        {visibleWarehouses.length > 0 ? (
+                            <button
+                                type='button'
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleExpand();
+                                }}
+                                className='mt-0.5 p-1 rounded-md hover:bg-primary-100 text-primary-600 cursor-pointer'
+                                aria-label='Xem kho chi tiết'
+                            >
+                                {isExpanded ? (
+                                    <ChevronDown size={16} />
+                                ) : (
+                                    <ChevronRight size={16} />
+                                )}
+                            </button>
+                        ) : null}
                     </div>
                 </td>
                 <td className='py-3 px-4 w-[34vw]'>
                     <div className='text-sm text-gray-700'>
-                        Còn trống: <span className='font-semibold text-primary-700'>{formatM3(company.companyAvailableCapacity)}</span> m3
+                        Còn trống:{' '}
+                        <span className='font-semibold text-primary-700'>
+                            {formatM3(company.companyAvailableCapacity)}
+                        </span>{' '}
+                        m3
                     </div>
                     <div className='text-sm text-gray-700 mt-0.5'>
-                        Sức chứa tối đa: <span className='font-semibold text-primary-700'>{formatM3(company.companyMaxCapacity)}</span> m3
+                        Sức chứa tối đa:{' '}
+                        <span className='font-semibold text-primary-700'>
+                            {formatM3(company.companyMaxCapacity)}
+                        </span>{' '}
+                        m3
                     </div>
                 </td>
             </tr>
 
             {isExpanded && (
-                <tr className={`${!isLast ? 'border-b border-primary-100' : ''} bg-white`}>
+                <tr
+                    className={`${!isLast ? 'border-b border-primary-100' : ''} bg-white`}
+                >
                     <td colSpan={4} className='px-6 py-4'>
                         <div className='rounded-xl border border-primary-100 overflow-hidden'>
                             <table className='w-full text-sm'>
                                 <thead className='bg-primary-50 text-primary-700 text-xs uppercase'>
                                     <tr>
-                                        <th className='py-2 px-3 text-left'>Kho / Điểm thu gom</th>
-                                        <th className='py-2 px-3 text-right'>Sức chứa kho (m3)</th>
-                                        <th className='py-2 px-3 text-right'>Sức chứa tối đa (m3)</th>
-                                        <th className='py-2 px-3 text-right'>Còn trống (m3)</th>
+                                        <th className='py-2 px-3 text-left'>
+                                            Kho / Điểm thu gom
+                                        </th>
+                                         <th className='py-2 px-3 text-right'>
+                                            Còn trống (m3)
+                                        </th>
+                                        <th className='py-2 px-3 text-right'>
+                                            Sức chứa tối đa (m3)
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {warehouses.length > 0 ? (
-                                        warehouses.map((warehouse: any) => (
-                                            <tr key={String(warehouse?.id)} className='border-t border-primary-50'>
-                                                <td className='py-2 px-3 text-gray-800'>{warehouse?.name || 'N/A'}</td>
-                                                <td className='py-2 px-3 text-right text-gray-700'>{formatM3(warehouse?.currentCapacity)}</td>
-                                                <td className='py-2 px-3 text-right text-gray-700'>{formatM3(warehouse?.maxCapacity)}</td>
-                                                <td className='py-2 px-3 text-right text-gray-700'>{formatM3(warehouse?.availableCapacity)}</td>
+                                    {visibleWarehouses.length > 0 ? (
+                                        visibleWarehouses.map((warehouse: any) => (
+                                            <tr
+                                                key={String(warehouse?.id)}
+                                                className='border-t border-primary-50'
+                                            >
+                                                <td className='py-2 px-3 text-gray-800'>
+                                                    {warehouse?.name || 'N/A'}
+                                                </td>
+                                                <td className='py-2 px-3 text-right text-gray-700'>
+                                                    {formatM3(
+                                                        warehouse?.availableCapacity
+                                                    )}
+                                                </td>
+                                                <td className='py-2 px-3 text-right text-gray-700'>
+                                                    {formatM3(
+                                                        warehouse?.maxCapacity
+                                                    )}
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={4} className='py-3 px-3 text-center text-gray-400'>
-                                                Không có dữ liệu kho
+                                            <td
+                                                colSpan={4}
+                                                className='py-3 px-3 text-center text-gray-400'
+                                            >
+                                                Không có điểm thu gom hoạt động
                                             </td>
                                         </tr>
                                     )}

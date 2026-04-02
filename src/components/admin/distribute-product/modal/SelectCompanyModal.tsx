@@ -35,25 +35,32 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
     if (!open) return null;
 
     const normalizeText = (v: any) => String(v ?? '').trim().toLowerCase();
+    const hasActivePoints = (company: any) =>
+        Array.isArray(company?.activePoints) && company.activePoints.length > 0;
+    const visibleCompanies = companies.filter((c) => hasActivePoints(c));
+
     const isLockedCompany = (company: any) => {
         const email = normalizeText(company?.companyEmail);
         const name = normalizeText(company?.name || company?.companyName);
         return email === 'contact@ewise.vn' || name === 'ewise express';
     };
 
-    const lockedCompanyRaw = companies.find((c) => isLockedCompany(c));
+    const lockedCompanyRaw = visibleCompanies.find((c) => isLockedCompany(c));
     const lockedCompanyId = lockedCompanyRaw ? String(lockedCompanyRaw?.companyId ?? lockedCompanyRaw?.id ?? '') : '';
     const effectiveSelectedCompanyIds = lockedCompanyId
         ? Array.from(new Set([...(selectedCompanyIds || []), String(lockedCompanyId)]))
         : selectedCompanyIds;
+    const visibleSelectedCompanyIds = effectiveSelectedCompanyIds.filter((selectedId) =>
+        visibleCompanies.some((c) => String(c?.companyId ?? c?.id ?? '') === selectedId)
+    );
 
     const allSelected =
-        companies.length > 0 &&
-        companies.every((c) => {
+        visibleCompanies.length > 0 &&
+        visibleCompanies.every((c) => {
             const companyId = String(c?.companyId ?? c?.id ?? '');
             return isLockedCompany(c) || effectiveSelectedCompanyIds.includes(companyId);
         });
-    const hasSelection = effectiveSelectedCompanyIds.length > 0;
+    const hasSelection = visibleSelectedCompanyIds.length > 0;
 
     const handleToggleExpand = (companyId: string) => {
         setExpandedCompanyIds((prev) =>
@@ -120,7 +127,7 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                                                     </th>
                                                     <th className='py-3 px-4 text-center w-[5vw]'>STT</th>
                                                     <th className='py-3 px-4 text-left w-[22vw]'>Công ty</th>
-                                                    <th className='py-3 px-4 text-left w-[34vw]'>Ngưỡng tải mỗi kho</th>
+                                                    <th className='py-3 px-4 text-left w-[34vw]'>Ngưỡng tải</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -142,8 +149,8 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                                                             </td>
                                                         </tr>
                                                     ))
-                                                ) : companies.length > 0 ? (
-                                                    companies.map((company, idx) => {
+                                                ) : visibleCompanies.length > 0 ? (
+                                                    visibleCompanies.map((company, idx) => {
                                                         const companyId = String(company.companyId ?? company.id);
 
                                                         return (
@@ -185,13 +192,13 @@ const SelectCompanyModal: React.FC<SelectCompanyModalProps> = ({
                     <div>
                         {hasSelection ? (
                             <span className='text-sm font-medium text-primary-700'>
-                                Đã chọn {effectiveSelectedCompanyIds.length} công ty
+                                Đã chọn {visibleSelectedCompanyIds.length} công ty
                             </span>
                         ) : null}
                     </div>
                     <div>
                         <button
-                            onClick={() => onConfirm(effectiveSelectedCompanyIds)}
+                            onClick={() => onConfirm(visibleSelectedCompanyIds)}
                             disabled={!hasSelection || distributing || productCount === 0}
                             className='px-6 py-2.5 text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition flex items-center justify-center gap-2 min-w-[140px] cursor-pointer'
                         >

@@ -93,7 +93,7 @@ export const PackageProvider: React.FC<Props> = ({ children }) => {
         page: 1,
         limit: 10,
         smallCollectionPointId: user?.smallCollectionPointId,
-        status: DELIVERED_UI_STATUS,
+        status: 'Đang đóng gói',
         fromDate: getFirstDayOfMonthString(),
         toDate: getTodayString(),
         packageId: ''

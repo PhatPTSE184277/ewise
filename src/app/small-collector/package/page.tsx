@@ -102,6 +102,13 @@ const PackagePage: React.FC = () => {
         }
     }, [filter.fromDate, filter.toDate, setFilter]);
 
+    // Ensure default status is 'Đang đóng gói' when first entering the page
+    useEffect(() => {
+        if (!filter.status || filter.status !== 'Đang đóng gói') {
+            setFilter({ status: 'Đang đóng gói', page: 1 });
+        }
+    }, [filter.status, setFilter]);
+
     useEffect(() => {
         if (filter.packageId) {
             setFilter({ packageId: '' });

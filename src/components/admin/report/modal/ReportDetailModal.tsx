@@ -38,8 +38,9 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 			{ icon: <Flag size={18} className='text-primary-600' />, label: 'Trạng thái', value: report.status || '' },
 			{ icon: <Tag size={18} className='text-primary-600' />, label: 'Loại', value: report.reportType || '' },
 			{ icon: <Calendar size={18} className='text-primary-600' />, label: 'Ngày tạo', value: formatDate(report.createdAt || '') },
-			{ icon: <Building2 size={18} className='text-primary-600' />, label: 'Công ty', value: report.companyName || '' },
-			{ icon: <MapPin size={18} className='text-primary-600' />, label: 'Điểm thu gom', value: report.smallCollectionPointName || '' },
+			{ icon: <Tag size={18} className='text-primary-600' />, label: 'Mô tả', value: report.reportDescription || '' },
+			{ icon: <Building2 size={18} className='text-primary-600' />, label: 'Công ty', value: report.companyName || 'Không' },
+			{ icon: <MapPin size={18} className='text-primary-600' />, label: 'Điểm thu gom', value: report.smallCollectionPointName || 'Không' },
 		];
 	}, [report]);
 
@@ -64,7 +65,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 		<div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
 			<div className='absolute inset-0 bg-black/30 backdrop-blur-sm'></div>
 
-			<div className='relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn'>
+			<div className='relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh] animate-fadeIn'>
 				<div className='flex justify-between items-center p-6 border-b border-gray-100 bg-linear-to-r from-primary-50 to-primary-100'>
 					<div>
 						<h2 className='text-2xl font-bold text-gray-800'>Chi tiết báo cáo</h2>
@@ -89,13 +90,6 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 							<SummaryCard items={summaryItems} />
 
 							<div className='p-4 rounded-xl border border-primary-100 bg-white'>
-								<div className='text-xs text-gray-500 mb-1'>Mô tả</div>
-								<div className='text-sm text-gray-900 whitespace-pre-line wrap-break-word'>
-									{report.reportDescription || ''}
-								</div>
-							</div>
-
-							<div className='p-4 rounded-xl border border-primary-100 bg-white'>
 								<div className='text-xs text-gray-500 mb-1'>Nội dung trả lời</div>
 								{isAnswered ? (
 									<div className='text-sm text-gray-900 whitespace-pre-line wrap-break-word'>{report.answerMessage}</div>
@@ -108,9 +102,6 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 										disabled={!canAnswer || submitting}
 									/>
 								)}
-								{!canAnswer ? (
-									<div className='text-xs text-gray-500 mt-2'>Báo cáo đã được trả lời, chỉ có thể xem.</div>
-								) : null}
 							</div>
 						</>
 					)}
@@ -125,14 +116,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 						>
 							{submitting ? 'Đang gửi...' : 'Gửi trả lời'}
 						</button>
-					) : (
-						<button
-							onClick={handleClose}
-							className='px-6 py-2 rounded-lg font-medium text-white cursor-pointer shadow-md transition-all duration-200 bg-primary-600 hover:bg-primary-700'
-						>
-							Đóng
-						</button>
-					)}
+					) : null}
 				</div>
 			</div>
 

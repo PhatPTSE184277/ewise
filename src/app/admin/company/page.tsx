@@ -197,6 +197,7 @@ const CompanyPage: React.FC = () => {
             {showDetailModal && selectedCompany && (
                 <CompanyDetail
                     company={selectedCompany}
+                    companyType={type}
                     onClose={handleCloseModal}
                 />
             )}

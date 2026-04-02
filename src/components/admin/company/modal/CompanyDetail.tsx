@@ -15,6 +15,7 @@ import CollectionPointBlock from './CollectionPointBlock';
 
 interface CompanyDetailProps {
     company: any;
+    companyType?: string;
     onClose: () => void;
 }
 
@@ -38,13 +39,15 @@ const SmallCollectionSkeleton: React.FC = () => (
     </>
 );
 
-const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onClose }) => {
+const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, companyType, onClose }) => {
     const [smallCollections, setSmallCollections] = useState<SmallCollectionPoint[]>([]);
     const [scLoading, setScLoading] = useState(false);
     const [filterStatus, setFilterStatus] = useState<'active' | 'inactive'>('active');
     const [actionLoading, setActionLoading] = useState(false);
     const [pendingApproveId, setPendingApproveId] = useState<string | number | null>(null);
     const [pendingBlockId, setPendingBlockId] = useState<string | number | null>(null);
+    const isRecycleCompany = String(companyType || company?.type || '').toLowerCase().includes('tái chế');
+    const warehouses = Array.isArray(company?.warehouses) ? company.warehouses : [];
 
     const loadPoints = (id: string | number) => {
         setScLoading(true);
@@ -55,10 +58,9 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onClose }) => {
     };
 
     useEffect(() => {
-        if (!company?.id) return;
+        if (!company?.id || isRecycleCompany) return;
         loadPoints(company.id);
-     
-    }, [company?.id]);
+    }, [company?.id, isRecycleCompany]);
 
     const handleApprove = async () => {
         if (!pendingApproveId) return;
@@ -158,13 +160,14 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onClose }) => {
                             },
                             {
                                 icon: <MapPin className="w-4 h-4 text-primary-500" />,
-                                label: 'Thành phố',
+                                label: 'Địa chỉ',
                                 value: company.city || 'Chưa có',
                             },
                         ]}
                     />
 
                     {/* Small collection section */}
+                    {!isRecycleCompany && (
                     <div className="mt-2">
                         {/* Section heading */}
                         <div className="flex items-center gap-2 mb-4">
@@ -278,6 +281,68 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ company, onClose }) => {
                             </div>
                         </div>
                     </div>
+                    )}
+
+                    {/* Warehouse section for recycle company */}
+                    {isRecycleCompany && (
+                        <div className="mt-2">
+                            <div className="flex items-center gap-2 mb-4">
+                                <MapPin className="w-4 h-4 text-primary-500" />
+                                <span className="text-sm font-bold text-primary-700 uppercase tracking-wide">
+                                    Danh sách kho liên kết
+                                </span>
+                            </div>
+
+                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
+                                <div className="overflow-x-auto">
+                                    <div className="max-h-64 overflow-y-auto">
+                                        <table className="min-w-full text-sm text-gray-800 table-fixed">
+                                            <thead className="bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-100">
+                                                <tr>
+                                                    <th className="py-3 px-4 text-center w-16">STT</th>
+                                                    <th className="py-3 px-4 text-left w-56">Tên kho</th>
+                                                    <th className="py-3 px-4 text-left">Địa chỉ</th>
+                                                    <th className="py-3 px-4 text-center w-40">Giờ mở cửa</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {warehouses.length > 0 ? (
+                                                    warehouses.map((warehouse: any, idx: number) => (
+                                                        <tr
+                                                            key={warehouse?.id || idx}
+                                                            className={`${idx !== warehouses.length - 1 ? 'border-b border-primary-100' : ''} ${idx % 2 === 0 ? 'bg-white' : 'bg-primary-50'}`}
+                                                        >
+                                                            <td className="py-3 px-4 text-center">
+                                                                <span className="w-7 h-7 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center font-semibold mx-auto">
+                                                                    {idx + 1}
+                                                                </span>
+                                                            </td>
+                                                            <td className="py-3 px-4 font-medium text-gray-900">
+                                                                {warehouse?.name || 'Không rõ'}
+                                                            </td>
+                                                            <td className="py-3 px-4 text-gray-700">
+                                                                {warehouse?.address || <span className="text-gray-400">Chưa có</span>}
+                                                            </td>
+                                                            <td className="py-3 px-4 text-center text-gray-700">
+                                                                {warehouse?.openTime || <span className="text-gray-400">Chưa có</span>}
+                                                            </td>
+                                                            {/* status column removed per request */}
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan={4} className="text-center py-8 text-gray-400">
+                                                            Không có kho liên kết nào.
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Animation */}

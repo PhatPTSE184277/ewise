@@ -74,6 +74,16 @@ export const CollectionRouteProvider: React.FC<Props> = ({ children }) => {
         cancelled: 0
     });
 
+    const handleSetSelectedDate = useCallback((date: string) => {
+        setSelectedDate((prev) => (prev === date ? prev : date));
+        setCurrentPage(1);
+    }, []);
+
+    const handleSetFilterStatus = useCallback((status: string) => {
+        setFilterStatus((prev) => (prev === status ? prev : status));
+        setCurrentPage(1);
+    }, []);
+
     // fetchRoutes truyền pickUpDate là string
     const fetchRoutes = useCallback(async (pickUpDate?: string) => {
         if (!user?.smallCollectionPointId) {
@@ -164,7 +174,7 @@ export const CollectionRouteProvider: React.FC<Props> = ({ children }) => {
         loading,
         fetchRoutes,
         selectedDate,
-        setSelectedDate,
+        setSelectedDate: handleSetSelectedDate,
         routeDetail,
         fetchRouteDetail,
         clearRouteDetail,
@@ -173,7 +183,7 @@ export const CollectionRouteProvider: React.FC<Props> = ({ children }) => {
         currentPage,
         setCurrentPage,
         filterStatus,
-        setFilterStatus,
+        setFilterStatus: handleSetFilterStatus,
         allStats,
     };
 

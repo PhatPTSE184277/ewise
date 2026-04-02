@@ -24,7 +24,7 @@ const CompanyList: React.FC<CompanyListProps> = ({
                                 <th className='py-3 px-4 text-left w-44'>Tên công ty</th>
                                 <th className='py-3 px-4 text-left w-52'>Email</th>
                                 <th className='py-3 px-4 text-left w-36'>Số điện thoại</th>
-                                <th className='py-3 px-4 text-left w-52'>Thành phố</th>
+                                <th className='py-3 px-4 text-left w-52'>Địa chỉ</th>
                                 <th className='py-3 px-4 text-center w-36'>Hành động</th>
                             </tr>
                         </thead>

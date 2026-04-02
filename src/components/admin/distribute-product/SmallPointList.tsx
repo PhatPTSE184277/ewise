@@ -32,7 +32,7 @@ const SmallPointList: React.FC<SmallPointListProps> = ({
                                         <th className='py-3 px-4 text-center w-[6vw]'>STT</th>
                                         <th className='py-3 px-4 text-left w-[18vw]'>Điểm thu gom</th>
                                         <th className='py-3 pr-4 text-right w-auto'>Tổng sản phẩm</th>
-                                        <th className='py-3 px-4 text-right w-[12vw]'>Sức chứa dự kiến (m3)</th>
+                                        <th className='py-3 px-4 text-right w-[15vw]'>Dung tích sản phẩm (m3)</th>
                                         <th className='py-3 px-4 text-center w-[10vw]'>Hành động</th>
                                     </tr>
                                 </thead>

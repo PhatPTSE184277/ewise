@@ -110,6 +110,7 @@ export function GroupingProvider({ children }: Props) {
     const [groupsPage, setGroupsPage] = useState<number>(1);
     const [groupsLimit, setGroupsLimit] = useState<number>(10);
     const [groupsTotalPage, setGroupsTotalPage] = useState<number>(1);
+    const [groupsDate, setGroupsDate] = useState<string>(getTodayString());
     const [driverCandidates, setDriverCandidates] = useState<any[]>([]);
     const [previewProductsPaging, setPreviewProductsPaging] = useState<PreviewProductsPagingResponse | null>(null);
     const [previewVehicles, setPreviewVehicles] = useState<any[]>([]);
@@ -119,11 +120,11 @@ export function GroupingProvider({ children }: Props) {
     const [unassignedProductsLoading, setUnassignedProductsLoading] = useState<boolean>(false);
     const [unassignedProductsTotalAllReasons, setUnassignedProductsTotalAllReasons] = useState<number>(0);
 
-    const fetchGroups = useCallback(async (page: number = groupsPage, limit: number = groupsLimit) => {
+    const fetchGroups = useCallback(async (page: number = groupsPage, limit: number = groupsLimit, date: string = groupsDate) => {
         if (!user?.smallCollectionPointId) return;
         setLoading(true);
         try {
-            const data = await getGroupsByCollectionPointId(user.smallCollectionPointId, page, limit);
+            const data = await getGroupsByCollectionPointId(user.smallCollectionPointId, page, limit, date);
             setGroupsPaging(data);
             setGroups(data.data || []);
             setGroupsPage(data.page || 1);
@@ -134,7 +135,7 @@ export function GroupingProvider({ children }: Props) {
         } finally {
             setLoading(false);
         }
-    }, [user?.smallCollectionPointId, groupsPage, groupsLimit]);
+    }, [user?.smallCollectionPointId, groupsPage, groupsLimit, groupsDate]);
 
     const fetchVehicles = useCallback(async (workDate?: string) => {
         if (!user?.smallCollectionPointId) return;
@@ -549,6 +550,7 @@ export function GroupingProvider({ children }: Props) {
         groupsPage,
         groupsLimit,
         groupsTotalPage,
+        groupsDate,
         driverCandidates,
         previewProductsPaging,
         previewVehicles,
@@ -569,6 +571,7 @@ export function GroupingProvider({ children }: Props) {
         fetchGroups,
         setGroupsPage,
         setGroupsLimit,
+        setGroupsDate,
         getPreAssignSuggestion,
         createGrouping,
         calculateRoute,
