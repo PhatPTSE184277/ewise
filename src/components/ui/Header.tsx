@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { IoLogOutOutline, IoChevronDownOutline, IoPersonOutline, IoNotificationsOutline, IoMenuOutline } from 'react-icons/io5';
 import Image from 'next/image';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ServerService from '@/services/ServerService';
 import { useAppDispatch } from '@/redux/hooks';
 import { logout } from '@/redux/reducers/authReducer';
@@ -218,21 +218,7 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
         }
     };
 
-    // Keep header background white; compute a text color based on role
-    const textColorClass = useMemo(() => {
-        const role = user?.role;
-        if (!role) return 'text-primary-600';
-        switch (role) {
-            case 'AdminWarehouse':
-                return 'text-blue-600';
-            case 'AdminCompany':
-                return 'text-green-600';
-            case 'RecyclingCompany':
-                return 'text-blue-600';
-            default:
-                return 'text-primary-600';
-        }
-    }, [user?.role]);
+    // Removed role-based text color computation — use default primary text color
 
     // Build greeting text, include company name for warehouse admins
     const greetingText = user?.role
@@ -258,7 +244,7 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
                         )}
                         <Link
                             href={finalHref ?? '/'}
-                            className={`text-base sm:text-lg md:text-xl lg:text-2xl font-bold ${textColorClass} flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap`}
+                            className={`text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-primary-600 flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap`}
                             onClick={handleReload}
                         >
                             <Image
@@ -274,14 +260,14 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
 
                     <div className='flex items-center space-x-1.5 sm:space-x-3 md:space-x-4'>
                         {serverTime && (
-                            <span className={`text-sm mr-2 ${textColorClass}`}>
+                            <span className={`text-sm mr-2 text-primary-600`}>
                                 {formatTimeWithDate(serverTime, true)}
                             </span>
                         )}
                         {isAuthenticated && user && (
                             <>
                                 {user.role && (
-                                    <span className={`hidden sm:inline-flex items-center text-sm ${textColorClass} bg-primary-50 rounded-full px-3 py-1 font-medium mr-2 shadow-sm`}>
+                                    <span className={`hidden sm:inline-flex items-center text-sm text-primary-600 bg-primary-50 rounded-full px-3 py-1 font-medium mr-2 shadow-sm`}>
                                         Chào mừng {greetingText}
                                     </span>
                                 )}

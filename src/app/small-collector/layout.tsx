@@ -12,7 +12,6 @@ import { PackageProvider } from '@/contexts/small-collector/PackageContext';
 import { SmallCollectorQRProvider } from '@/contexts/small-collector/QRContext';
 import { UserProvider } from '@/contexts/UserContext';
 import { DashboardProvider } from '@/contexts/small-collector/DashboardContext';
-import { SeedQRCodeProvider } from '@/contexts/small-collector/SeedQRCodeContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import { VehicleProvider } from '@/contexts/small-collector/VehicleContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -65,11 +64,9 @@ export default function SmallCollectorLayout({
                                 <UserProvider>
                                     <CategoryProvider>
                                         <DashboardProvider>
-                                            <SeedQRCodeProvider>
                                                 <VehicleProvider>
                                                     <LayoutContent>{children}</LayoutContent>
                                                 </VehicleProvider>
-                                            </SeedQRCodeProvider>
                                         </DashboardProvider>
                                     </CategoryProvider>
                                 </UserProvider>
