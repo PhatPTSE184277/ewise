@@ -1,25 +1,29 @@
 'use client';
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, MapPin, CheckCircle, Package, Clock3 } from 'lucide-react';
-import { useTrackingContext } from '@/contexts/admin/TrackingContext';
+import type { PackageType } from '@/types/Package';
 import SummaryCard from '@/components/ui/SummaryCard';
-import ProductList from '@/components/collection-point/package/modal/ProductList';
+import ProductList from './ProductList';
 import Pagination from '@/components/ui/Pagination';
+import { usePackageContext } from '@/contexts/collection-point/PackageContext';
 import { formatTimeWithDate } from '@/utils/FormatTime';
 
-interface TrackingModalProps {
-    pkg: any;
+interface PackageDetailProps {
+    pkg: PackageType;
     onClose: () => void;
 }
 
-const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
-    const { packageDetail, loadingPackageDetail, fetchPackageDetail } = useTrackingContext();
+const PackageDetail: React.FC<PackageDetailProps> = ({
+    pkg,
+    onClose
+}) => {
+    const { selectedPackage: packageDetail, loadingDetail: loadingPackageDetail, fetchPackageDetail } = usePackageContext();
     const [activeTab, setActiveTab] = useState<'products' | 'history'>('products');
     const [productPage, setProductPage] = useState(1);
     const limit = 10;
 
     const detail = packageDetail || pkg;
+    const detailAny = detail as any;
 
     const normalizeDisplayStatus = (status?: string): string => {
         if (status === 'Đang vận chuyển' || status === 'Tái chế') {
@@ -39,7 +43,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
     };
 
     const mergedStatusHistories = useMemo(() => {
-        const rawHistories = (detail?.statusHistories || pkg?.statusHistories || []) as any[];
+        const rawHistories = (detailAny?.statusHistories || pkg?.statusHistories || []) as any[];
         if (!Array.isArray(rawHistories) || rawHistories.length === 0) return [];
 
         const shippingHistory = rawHistories.find((item: any) => item?.status === 'Đang vận chuyển');
@@ -59,7 +63,6 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
                 ...deliveredSource,
                 status: 'Đã giao',
                 description: 'Kiện hàng đã được giao cho công ty tái chế',
-                // Always prioritize shipping timestamp when both statuses exist
                 createAt: shippingHistory?.createAt || shippingHistory?.createdAt || deliveredSource?.createAt || deliveredSource?.createdAt,
                 createdAt: shippingHistory?.createdAt || shippingHistory?.createAt || deliveredSource?.createdAt || deliveredSource?.createAt
             });
@@ -70,8 +73,8 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
             const timeB = new Date(b?.createAt || b?.createdAt || 0).getTime();
             return timeB - timeA;
         });
-    }, [detail?.statusHistories, pkg?.statusHistories]);
-    
+    }, [detailAny?.statusHistories, pkg?.statusHistories]);
+
     useEffect(() => {
         const packageId = pkg?.packageId;
         if (packageId) {
@@ -93,7 +96,10 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
             {
                 icon: <MapPin size={14} className='text-primary-400' />,
                 label: 'Điểm thu gom',
-                value: detail?.smallCollectionPointsName || detail?.smallCollectionPointsAddress || 'N/A'
+                value:
+                    detail?.smallCollectionPointsName ||
+                    detail?.smallCollectionPointsAddress ||
+                    'N/A'
             },
             {
                 icon: <CheckCircle size={14} className='text-primary-400' />,
@@ -171,7 +177,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
                             ) : (
                                 <>
                                     <ProductList
-                                        products={(detail?.products?.data || []).map((product: any) => ({
+                                        products={(detail?.products?.data || []).map((product) => ({
                                             ...product,
                                             qrCode: product.qrCode || undefined
                                         }))}
@@ -188,7 +194,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
                         ) : (
                             <div className='max-h-[62vh] overflow-auto'>
                                 {mergedStatusHistories.length ? (
-                                    <div className='relative w-full overflow-y-auto' style={{ maxHeight: '40vh' }}>
+                                    <div className='relative w-full overflow-y-auto' style={{ maxHeight: `40vh` }}>
                                         <table className='w-full text-sm text-gray-800 table-fixed'>
                                             <thead className='bg-primary-50 text-primary-700 uppercase text-xs font-semibold sticky top-0 z-10 border-b border-primary-100'>
                                                 <tr>
@@ -198,7 +204,7 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {mergedStatusHistories.map((item: any, idx: number) => {
+                                                {mergedStatusHistories.map((item, idx) => {
                                                     const isLast = idx === mergedStatusHistories.length - 1;
                                                     const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-primary-50';
                                                     return (
@@ -224,4 +230,4 @@ const TrackingModal: React.FC<TrackingModalProps> = ({ pkg, onClose }) => {
     );
 };
 
-export default TrackingModal;
+export default PackageDetail;

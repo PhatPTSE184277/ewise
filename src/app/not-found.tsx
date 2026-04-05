@@ -1,7 +1,6 @@
 'use client';
 
 import Header from '@/components/ui/Header';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, ArrowLeft, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,7 +19,7 @@ export default function NotFound() {
       case 'AdminCompany':
         return '/company/small-collection';
       case 'Collector':
-        return '/small-collector/dashboard';
+        return '/collection-point/dashboard';
       case 'RecyclingCompany':
         return '/recycle/package';
       default:
@@ -32,7 +31,7 @@ export default function NotFound() {
 
   return (
     <>
-      <Header title="Thu gom" href="/" profileHref="/profile" />
+      <Header title="Ewise" href="/" profileHref="/profile" />
       <main className="relative min-h-[calc(100dvh-3.5rem)] overflow-hidden bg-linear-to-br from-primary-50 via-white to-background-50 px-4 py-10 sm:min-h-[calc(100dvh-4rem)] sm:py-14">
         <div className="pointer-events-none absolute inset-0 opacity-70">
           <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-primary-100 blur-3xl" />

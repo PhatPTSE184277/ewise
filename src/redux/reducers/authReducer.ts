@@ -10,6 +10,7 @@ const initialState: AuthState = {
     loading: false,
     error: null,
     isFirstLogin: false,
+    notificationMessage: null,
 };
 
 // Async thunk for login
@@ -18,10 +19,13 @@ export const login = createAsyncThunk(
     async ({ username, password }: LoginCredentials, { rejectWithValue }) => {
         try {
             const response = await loginService(username, password);
-            const { accessToken, isFirstLogin } = response;
+            const { accessToken, refreshToken, isFirstLogin } = response;
             
-            // Save token to localStorage
+            // Save tokens to storage
             localStorage.setItem('ewise_token', accessToken);
+            localStorage.setItem('ewise_refresh_token', refreshToken);
+            sessionStorage.setItem('ewise_token', accessToken);
+            sessionStorage.setItem('ewise_refresh_token', refreshToken);
             
             // Get user profile
             const userProfile = await getUserProfile();
@@ -38,7 +42,7 @@ export const loadUserFromToken = createAsyncThunk(
     'auth/loadUserFromToken',
     async (_, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('ewise_token');
+            const token = localStorage.getItem('ewise_token') || sessionStorage.getItem('ewise_token');
             
             if (!token) {
                 return rejectWithValue('No token found');
@@ -49,6 +53,9 @@ export const loadUserFromToken = createAsyncThunk(
             return { token, user: userProfile };
         } catch (error: any) {
             localStorage.removeItem('ewise_token');
+            sessionStorage.removeItem('ewise_token');
+            localStorage.removeItem('ewise_refresh_token');
+            sessionStorage.removeItem('ewise_refresh_token');
             return rejectWithValue(error?.response?.data?.message || 'Token không hợp lệ');
         }
     }
@@ -57,6 +64,9 @@ export const loadUserFromToken = createAsyncThunk(
 // Async thunk for logout
 export const logout = createAsyncThunk('auth/logout', async () => {
     localStorage.removeItem('ewise_token');
+    sessionStorage.removeItem('ewise_token');
+    localStorage.removeItem('ewise_refresh_token');
+    sessionStorage.removeItem('ewise_refresh_token');
     return null;
 });
 
@@ -66,6 +76,12 @@ const authSlice = createSlice({
     reducers: {
         clearError: (state) => {
             state.error = null;
+        },
+        setNotificationMessage: (state, action: PayloadAction<string | null>) => {
+            state.notificationMessage = action.payload;
+        },
+        clearNotificationMessage: (state) => {
+            state.notificationMessage = null;
         },
     },
     extraReducers: (builder) => {
@@ -81,6 +97,7 @@ const authSlice = createSlice({
             state.user = action.payload.user;
             state.error = null;
             state.isFirstLogin = action.payload.isFirstLogin;
+            state.notificationMessage = null;
         });
         builder.addCase(login.rejected, (state, action) => {
             state.loading = false;
@@ -106,6 +123,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.token = null;
             state.user = null;
+            state.isFirstLogin = false;
         });
 
         // Logout
@@ -120,4 +138,5 @@ const authSlice = createSlice({
 });
 
 export const { clearError } = authSlice.actions;
+export const { setNotificationMessage, clearNotificationMessage } = authSlice.actions;
 export default authSlice.reducer;

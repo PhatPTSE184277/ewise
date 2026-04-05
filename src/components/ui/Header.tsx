@@ -190,8 +190,8 @@ const Header = ({ title, href, profileHref, onMenuClick }: HeaderProps) => {
 
         // Navigate to grouping page if it's a grouping notification
         if (isGroupingNotif && typeof window !== 'undefined') {
-            if (window.location.pathname !== '/small-collector/grouping') {
-                router.push('/small-collector/grouping');
+            if (window.location.pathname !== '/collection-point/grouping') {
+                router.push('/collection-point/grouping');
             } else {
                 // Already on the page, trigger a reload to apply new params
                 window.location.reload();
