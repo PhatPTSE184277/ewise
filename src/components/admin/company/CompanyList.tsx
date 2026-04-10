@@ -6,12 +6,16 @@ interface CompanyListProps {
     companies: any[];
     loading: boolean;
     onViewDetail: (company: any) => void;
+    onRegisterCategory?: (company: any) => void;
+    showRegisterCategory?: boolean;
 }
 
 const CompanyList: React.FC<CompanyListProps> = ({
     companies,
     loading,
-    onViewDetail
+    onViewDetail,
+    onRegisterCategory,
+    showRegisterCategory = false
 }) => {
     return (
         <div className='bg-white rounded-2xl shadow-lg border border-gray-100 mb-6'>
@@ -39,6 +43,8 @@ const CompanyList: React.FC<CompanyListProps> = ({
                                         key={company.id}
                                         company={company}
                                         onView={() => onViewDetail(company)}
+                                        onRegisterCategory={onRegisterCategory ? () => onRegisterCategory(company) : undefined}
+                                        showRegisterCategory={showRegisterCategory}
                                         isLast={idx === companies.length - 1}
                                         index={idx}
                                     />

@@ -1,16 +1,20 @@
 import React from 'react';
 import { formatNumber } from '@/utils/formatNumber';
-import { Eye } from 'lucide-react';
+import { Eye, Tag } from 'lucide-react';
 
 interface CompanyShowProps {
     company: any;
     onView: () => void;
+    onRegisterCategory?: () => void;
+    showRegisterCategory?: boolean;
     index?: number;
 }
 
 const CompanyShow: React.FC<CompanyShowProps & { isLast?: boolean }> = ({
     company,
     onView,
+    onRegisterCategory,
+    showRegisterCategory = false,
     isLast = false,
     index
 }) => {
@@ -44,6 +48,16 @@ const CompanyShow: React.FC<CompanyShowProps & { isLast?: boolean }> = ({
                     >
                         <Eye size={16} />
                     </button>
+                    {showRegisterCategory && onRegisterCategory && (
+                        <button
+                            onClick={onRegisterCategory}
+                            className='text-primary-600 hover:text-primary-800 flex items-center gap-1 font-medium transition cursor-pointer'
+                            title='Đăng ký danh mục'
+                            type='button'
+                        >
+                            <Tag size={16} />
+                        </button>
+                    )}
                 </div>
             </td>
         </tr>
