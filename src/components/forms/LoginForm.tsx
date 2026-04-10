@@ -8,6 +8,7 @@ import {
 } from 'react-icons/io5';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { login, clearError } from '@/redux/reducers/authReducer';
+import Toast from '@/components/ui/Toast';
 import FirstLoginChangePasswordModal from './FirstLoginChangePasswordModal';
 import { changePasswordFirstLogin } from '@/services/AuthService';
 
@@ -19,11 +20,9 @@ const LoginForm = () => {
     const dispatch = useAppDispatch();
     const { loading, error, isAuthenticated, user } = useAppSelector((state) => state.auth);
 
-    useEffect(() => {
-        if (error) {
-            dispatch(clearError());
-        }
-    }, [error, dispatch]);
+    // Derive toast open/message directly from Redux error
+    const toastOpen = !!error;
+    const toastMessage = (error as string) || '';
 
     useEffect(() => {
         if (isAuthenticated && user) {
@@ -100,6 +99,13 @@ const LoginForm = () => {
 
     return (
         <div className='bg-white rounded-2xl shadow-xl p-8 animate-slide-in-right border border-gray-100'>
+
+            <Toast
+                open={toastOpen}
+                type="error"
+                message={toastMessage}
+                onClose={() => dispatch(clearError())}
+            />
 
             <form onSubmit={handleSubmit} className='space-y-6'>
                 <div>

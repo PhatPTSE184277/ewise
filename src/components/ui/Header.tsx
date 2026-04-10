@@ -381,7 +381,7 @@ const Header = ({ href, profileHref, onMenuClick }: HeaderProps) => {
                                                                         }`}>
                                                                             {notif.title}
                                                                         </h4>
-                                                                        <p className='text-sm text-gray-600 whitespace-normal break-words'>
+                                                                        <p className='text-sm text-gray-600 whitespace-normal wrap-break-word'>
                                                                             {notif.message}
                                                                         </p>
                                                                         <p className='text-xs text-gray-400 mt-1'>
