@@ -98,7 +98,14 @@ const Header = ({ href, profileHref, onMenuClick }: HeaderProps) => {
         const notifText = `${notif?.title ?? ''} ${notif?.message ?? ''}`.toLowerCase();
 
         const inferRecycleStatus = (): string | undefined => {
-            if (action === 'PACKAGES_IN_TRANSIT' || notifText.includes('vận chuyển') || notifText.includes('giao cho bên vận chuyển')) {
+            if (
+                action === 'PACKAGES_IN_TRANSIT' ||
+                action === 'PACKAGE_DELIVERED' ||
+                action === 'PACKAGES_DELIVERED' ||
+                notifText.includes('vận chuyển') ||
+                notifText.includes('giao cho bên vận chuyển') ||
+                notifText.includes('đang đến')
+            ) {
                 return PackageStatus.Shipping;
             }
             if (action === 'PACKAGE_CLOSED' || action === 'PACKAGES_CLOSED' || notifText.includes('đóng thùng') || notifText.includes('khóa')) {
@@ -336,7 +343,7 @@ const Header = ({ href, profileHref, onMenuClick }: HeaderProps) => {
                                                 </div>
 
                                                 {/* Notification List */}
-                                                <div className='overflow-y-auto flex-1'>
+                                                <div className='overflow-y-auto flex-1 min-h-0'>
                                                     {notifications.length === 0 ? (
                                                         <div className='p-8 text-center text-gray-400'>
                                                             <IoNotificationsOutline className='mx-auto mb-2' size={48} />
@@ -374,7 +381,7 @@ const Header = ({ href, profileHref, onMenuClick }: HeaderProps) => {
                                                                         }`}>
                                                                             {notif.title}
                                                                         </h4>
-                                                                        <p className='text-sm text-gray-600 line-clamp-2'>
+                                                                        <p className='text-sm text-gray-600 whitespace-normal break-words'>
                                                                             {notif.message}
                                                                         </p>
                                                                         <p className='text-xs text-gray-400 mt-1'>
@@ -390,6 +397,33 @@ const Header = ({ href, profileHref, onMenuClick }: HeaderProps) => {
                                                                     <Link
                                                                         key={notif.notificationId}
                                                                         href='/admin/distribute-product'
+                                                                        onClick={() => handleNotificationClick(notif)}
+                                                                        className={`block p-4 border-b border-primary-50 cursor-pointer transition ${
+                                                                            notif.isRead ? 'bg-white hover:bg-gray-50' : 'bg-primary-50/50 hover:bg-primary-50'
+                                                                        }`}
+                                                                    >
+                                                                        {content}
+                                                                    </Link>
+                                                                );
+                                                            }
+
+                                                            const action = notif?.data?.action || notif?.action;
+                                                            const notifText = `${notif?.title ?? ''} ${notif?.message ?? ''}`.toLowerCase();
+                                                            const isRecyclePackageNotif =
+                                                                action === 'PACKAGES_IN_TRANSIT' ||
+                                                                action === 'PACKAGE_CLOSED' ||
+                                                                action === 'PACKAGES_CLOSED' ||
+                                                                action === 'PACKAGE_DELIVERED' ||
+                                                                action === 'PACKAGES_DELIVERED' ||
+                                                                notifText.includes('kiện hàng') ||
+                                                                notifText.includes('đơn hàng') ||
+                                                                notifText.includes('đang đến');
+
+                                                            if (isRecyclePackageNotif && user?.role === 'RecyclingCompany') {
+                                                                return (
+                                                                    <Link
+                                                                        key={notif.notificationId}
+                                                                        href='/recycle/package'
                                                                         onClick={() => handleNotificationClick(notif)}
                                                                         className={`block p-4 border-b border-primary-50 cursor-pointer transition ${
                                                                             notif.isRead ? 'bg-white hover:bg-gray-50' : 'bg-primary-50/50 hover:bg-primary-50'
