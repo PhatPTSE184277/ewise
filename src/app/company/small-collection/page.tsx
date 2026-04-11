@@ -32,7 +32,7 @@ const SmallCollectionPage: React.FC = () => {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [search, setSearch] = useState('');
     const [showImportModal, setShowImportModal] = useState(false);
-    const [filterStatus, setFilterStatus] = useState('active');
+    const [filterStatus, setFilterStatus] = useState<'Đang hoạt động' | 'Không hoạt động'>('Đang hoạt động');
     const [templateUrl, setTemplateUrl] = useState<string | null>(null);
     const [toast, setToast] = useState<{ open: boolean; type: 'success' | 'error'; message: string }>({
         open: false,
@@ -44,9 +44,8 @@ const SmallCollectionPage: React.FC = () => {
 
     useEffect(() => {
         if (!companyId) return;
-        // Gọi rõ ràng từ page để tải danh sách (cùng tham số với context)
-        fetchSmallCollections({ companyId, page: 1, limit: 10 }).catch(() => {});
-    }, [companyId, fetchSmallCollections]);
+        fetchSmallCollections({ companyId, page: 1, limit: 10, status: filterStatus }).catch(() => {});
+    }, [companyId, fetchSmallCollections, filterStatus]);
 
     useEffect(() => {
         const loadTemplate = async () => {
@@ -78,6 +77,16 @@ const SmallCollectionPage: React.FC = () => {
         setSelectedSmallCollection(null);
     };
 
+    const handlePageChange = (page: number) => {
+        if (!companyId) return;
+        void fetchSmallCollections({
+            companyId,
+            page,
+            limit: pageInfo?.limit ?? 10,
+            status: filterStatus
+        });
+    };
+
     const handleImportExcel = async (file: File): Promise<boolean> => {
         if (!companyId) {
             setToast({
@@ -89,7 +98,7 @@ const SmallCollectionPage: React.FC = () => {
         }
         try {
             await importSmallCollection(file);
-            await fetchSmallCollections({ companyId, page: 1, limit: 10 });
+            await fetchSmallCollections({ companyId, page: 1, limit: 10, status: filterStatus });
 
             setToast({
                 open: true,
@@ -109,16 +118,10 @@ const SmallCollectionPage: React.FC = () => {
 
     const filteredCollections = smallCollections.filter((point) => {
         const searchLower = search.toLowerCase();
-        const matchSearch =
+        return (
             point.name?.toLowerCase().includes(searchLower) ||
-            point.address?.toLowerCase().includes(searchLower);
-        if (filterStatus === 'active') {
-            return matchSearch && point.status === 'DANG_HOAT_DONG';
-        }
-        if (filterStatus === 'inactive') {
-            return matchSearch && point.status !== 'DANG_HOAT_DONG';
-        }
-        return matchSearch;
+            point.address?.toLowerCase().includes(searchLower)
+        );
     });
 
     return (
@@ -186,10 +189,7 @@ const SmallCollectionPage: React.FC = () => {
                 <Pagination
                     page={pageInfo.page}
                     totalPages={pageInfo.totalPages}
-                    onPageChange={(p) => {
-                        if (!companyId) return;
-                        void fetchSmallCollections({ companyId, page: p, limit: pageInfo.limit });
-                    }}
+                    onPageChange={handlePageChange}
                 />
             )}
 

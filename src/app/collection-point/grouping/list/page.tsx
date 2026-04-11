@@ -10,6 +10,7 @@ import CustomDatePicker from '@/components/ui/CustomDatePicker';
 import GroupingDetail from '@/components/collection-point/grouping/list/modal/GroupingDetail';
 import ReassignDriverModal from '@/components/collection-point/grouping/list/modal/ReassignDriverModal';
 import { useGroupingContext } from '@/contexts/collection-point/GroupingContext';
+import { getTodayString } from '@/utils/getDayString';
 
 const GroupingListPage: React.FC = () => {
     const router = useRouter();
@@ -23,9 +24,9 @@ const GroupingListPage: React.FC = () => {
         groupsPage,
         groupsTotalPage,
         setGroupsPage,
-        groupsDate,
         setGroupsDate
     } = useGroupingContext();
+    const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
     const [search] = useState('');
     const [selectedGrouping, setSelectedGrouping] = useState<any | null>(null);
     const [showReassignModal, setShowReassignModal] = useState(false);
@@ -33,8 +34,8 @@ const GroupingListPage: React.FC = () => {
 
     // Fetch groups on mount
     useEffect(() => {
-        fetchGroups(groupsPage, 10, groupsDate);
-    }, [fetchGroups, groupsPage, groupsDate]);
+        fetchGroups(groupsPage, 10, selectedDate);
+    }, [fetchGroups, groupsPage, selectedDate]);
 
     const filteredGroupings = groups.filter((group: any) => {
         const matchSearch =
@@ -49,6 +50,7 @@ const GroupingListPage: React.FC = () => {
     };
 
     const handleDateChange = (date: string) => {
+        setSelectedDate(date);
         setGroupsDate(date);
         setGroupsPage(1);
     };
@@ -82,7 +84,7 @@ const GroupingListPage: React.FC = () => {
                 <div className='flex items-center gap-3'>
                     <div className='min-w-fit'>
                         <CustomDatePicker
-                            value={groupsDate}
+                            value={selectedDate}
                             onChange={handleDateChange}
                             placeholder='Chọn ngày thu gom'
                         />

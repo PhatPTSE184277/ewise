@@ -17,7 +17,7 @@ import { pickExcelTemplateUrl } from '@/utils/excelTemplateConfig';
 
 const VehiclePage: React.FC = () => {
     const { user } = useAuth();
-    const { vehicles, loading, fetchVehicles, importVehicles, page, limit, total, setPage } = useVehicleContext();
+    const { vehicles, loading, fetchVehicles, importVehicles, page, limit, totalPages, setPage } = useVehicleContext();
     const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
@@ -164,7 +164,7 @@ const VehiclePage: React.FC = () => {
             {/* Pagination */}
             <Pagination
                 page={page}
-                totalPages={Math.ceil(total / limit)}
+                totalPages={totalPages}
                 onPageChange={setPage}
             />
 

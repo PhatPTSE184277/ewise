@@ -6,6 +6,11 @@ import { useAuth } from '@/hooks/useAuth';
 
 export type VehicleStatusFilter = 'Đang hoạt động' | 'Không hoạt động';
 
+type VehicleStats = {
+    active: number;
+    inactive: number;
+};
+
 interface VehicleContextType {
     loading: boolean;
     actionLoading: boolean;
@@ -13,9 +18,11 @@ interface VehicleContextType {
     totalItems: number;
     page: number;
     totalPages: number;
+    stats: VehicleStats;
     selectedVehicle: VehicleItem | null;
     error: string | null;
-    fetchVehicles: (status?: VehicleStatusFilter, pageNum?: number, limit?: number) => Promise<void>;
+    fetchVehicles: (status?: VehicleStatusFilter, pageNum?: number, limit?: number, plateNumber?: string) => Promise<void>;
+    fetchVehicleStats: (plateNumber?: string) => Promise<void>;
     fetchVehicleDetail: (id: string) => Promise<void>;
     approveVehicle: (vehicleId: string) => Promise<void>;
     blockVehicle: (vehicleId: string) => Promise<void>;
@@ -32,23 +39,61 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({ children })
     const [totalItems, setTotalItems] = useState(0);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [stats, setStats] = useState<VehicleStats>({ active: 0, inactive: 0 });
     const [selectedVehicle, setSelectedVehicle] = useState<VehicleItem | null>(null);
     const [error, setError] = useState<string | null>(null);
     const currentStatusRef = React.useRef<VehicleStatusFilter | undefined>(undefined);
+    const currentPlateNumberRef = React.useRef<string | undefined>(undefined);
+    const currentPageRef = React.useRef<number>(1);
+    const currentLimitRef = React.useRef<number>(10);
+
+    const fetchVehicleStats = useCallback(async (plateNumber?: string) => {
+        if (!user?.smallCollectionPointId) return;
+        try {
+            const [activeRes, inactiveRes] = await Promise.all([
+                filterVehicles({
+                    smallCollectionPointId: user.smallCollectionPointId,
+                    status: 'Đang hoạt động',
+                    plateNumber,
+                    page: 1,
+                    limit: 1,
+                }),
+                filterVehicles({
+                    smallCollectionPointId: user.smallCollectionPointId,
+                    status: 'Không hoạt động',
+                    plateNumber,
+                    page: 1,
+                    limit: 1,
+                }),
+            ]);
+
+            setStats({
+                active: activeRes?.totalItems || 0,
+                inactive: inactiveRes?.totalItems || 0,
+            });
+        } catch {
+            setStats({ active: 0, inactive: 0 });
+        }
+    }, [user?.smallCollectionPointId]);
 
     const fetchVehicles = useCallback(async (
         status?: VehicleStatusFilter,
         pageNum: number = 1,
-        limit: number = 20
+        limit: number = 10,
+        plateNumber?: string
     ) => {
         if (!user?.smallCollectionPointId) return;
         currentStatusRef.current = status;
+        currentPlateNumberRef.current = plateNumber;
+        currentPageRef.current = pageNum;
+        currentLimitRef.current = limit;
         setLoading(true);
         setError(null);
         try {
             const data: VehicleListPagingResponse = await filterVehicles({
                 smallCollectionPointId: user.smallCollectionPointId,
                 status,
+                plateNumber,
                 page: pageNum,
                 limit,
             });
@@ -84,26 +129,38 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({ children })
         setError(null);
         try {
             await approveVehicleApi(vehicleId);
-            await fetchVehicles(currentStatusRef.current);
+            await fetchVehicles(
+                currentStatusRef.current,
+                currentPageRef.current,
+                currentLimitRef.current,
+                currentPlateNumberRef.current
+            );
+            await fetchVehicleStats(currentPlateNumberRef.current);
         } catch (err: any) {
             setError(err?.response?.data?.message || 'Lỗi khi duyệt phương tiện');
         } finally {
             setActionLoading(false);
         }
-    }, [fetchVehicles]);
+    }, [fetchVehicles, fetchVehicleStats]);
 
     const blockVehicle = useCallback(async (vehicleId: string) => {
         setActionLoading(true);
         setError(null);
         try {
             await blockVehicleApi(vehicleId);
-            await fetchVehicles(currentStatusRef.current);
+            await fetchVehicles(
+                currentStatusRef.current,
+                currentPageRef.current,
+                currentLimitRef.current,
+                currentPlateNumberRef.current
+            );
+            await fetchVehicleStats(currentPlateNumberRef.current);
         } catch (err: any) {
             setError(err?.response?.data?.message || 'Lỗi khi khóa phương tiện');
         } finally {
             setActionLoading(false);
         }
-    }, [fetchVehicles]);
+    }, [fetchVehicles, fetchVehicleStats]);
 
     const value: VehicleContextType = {
         loading,
@@ -112,9 +169,11 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({ children })
         totalItems,
         page,
         totalPages,
+        stats,
         selectedVehicle,
         error,
         fetchVehicles,
+        fetchVehicleStats,
         fetchVehicleDetail,
         approveVehicle,
         blockVehicle,

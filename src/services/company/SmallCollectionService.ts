@@ -5,7 +5,7 @@ export const importSmallCollectionExcel = async (file: File): Promise<any> => {
     const formData = new FormData();
     formData.append('file', file);
     const response = await axios.post(
-        '/small-collection/import-excel',
+        '/smallCollectionPoint/import-excel',
         formData,
         {
             headers: {
@@ -26,7 +26,7 @@ export interface SmallCollectionFilterParams {
 export const getSmallCollectionsFilter = async (
     params: SmallCollectionFilterParams
 ): Promise<any> => {
-    const response = await axios.get('/small-collection/filter', {
+    const response = await axios.get('/smallCollectionPoint/filter', {
         params
     });
     return response.data;
@@ -36,7 +36,7 @@ export const getSmallCollectionPointById = async (
     smallCollectionPointId: number | string
 ): Promise<SmallCollectionPoint> => {
     const response = await axios.get(
-        `/small-collection/${smallCollectionPointId}`
+        `/smallCollectionPoint/${smallCollectionPointId}`
     );
     return response.data;
 };

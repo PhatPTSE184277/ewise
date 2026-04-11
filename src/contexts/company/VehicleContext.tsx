@@ -11,6 +11,7 @@ interface VehicleContextType {
   page: number;
   limit: number;
   total: number;
+  totalPages: number;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
   fetchVehicles: (params?: VehicleFilterParams) => Promise<void>;
@@ -29,6 +30,7 @@ export const VehicleProvider = ({ children }: { children: ReactNode }) => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchVehicles = useCallback(async (params?: VehicleFilterParams) => {
     setLoading(true);
@@ -38,19 +40,29 @@ export const VehicleProvider = ({ children }: { children: ReactNode }) => {
       if (Array.isArray(data)) {
         setVehicles(data);
         setTotal(data.length);
+        setTotalPages(1);
       } else {
         setVehicles(data?.data || []);
-        setTotal(data?.totalItems ?? data?.total ?? 0);
+        const nextTotal = data?.totalItems ?? data?.total ?? 0;
+        const nextLimit = data?.limit ?? params?.limit ?? limit;
+        const nextPage = data?.page ?? params?.page ?? page;
+        const nextTotalPages = data?.totalPages ?? Math.max(1, Math.ceil(nextTotal / (nextLimit || 1)));
+
+        setTotal(nextTotal);
+        setLimit(nextLimit);
+        setPage(nextPage);
+        setTotalPages(nextTotalPages);
       }
     } catch (err: any) {
       console.log(err);
       setError(err?.response?.data?.message || 'Lỗi khi tải phương tiện');
       setVehicles([]);
       setTotal(0);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [limit, page]);
 
   const fetchVehicleDetail = useCallback(async (id: string) => {
     setLoading(true);
@@ -85,6 +97,7 @@ export const VehicleProvider = ({ children }: { children: ReactNode }) => {
     setSelectedVehicle(null);
     setError(null);
     setTotal(0);
+    setTotalPages(1);
   }, []);
 
   const value: VehicleContextType = {
@@ -95,6 +108,7 @@ export const VehicleProvider = ({ children }: { children: ReactNode }) => {
     page,
     limit,
     total,
+    totalPages,
     setPage,
     setLimit,
     fetchVehicles,

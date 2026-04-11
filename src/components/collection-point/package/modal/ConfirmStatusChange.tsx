@@ -82,10 +82,7 @@ const ConfirmStatusChange: React.FC<ConfirmStatusChangeProps> = ({
                 {/* Footer */}
                 <div className='flex justify-end gap-3 p-6 border-t border-gray-100 bg-gray-50'>
                     <button
-                        onClick={() => {
-                            onConfirm();
-                            onClose();
-                        }}
+                        onClick={onConfirm}
                         className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium cursor-pointer shadow-md border border-primary-200'
                     >
                         Xác nhận đóng

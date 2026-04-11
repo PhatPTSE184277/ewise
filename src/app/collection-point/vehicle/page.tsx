@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Truck } from 'lucide-react';
 import { useVehicleContext, VehicleStatusFilter } from '@/contexts/collection-point/VehicleContext';
 import VehicleFilter from '@/components/collection-point/vehicle/VehicleFilter';
@@ -9,10 +9,11 @@ import VehicleDetail from '@/components/collection-point/vehicle/modal/VehicleDe
 import VehicleApprove from '@/components/collection-point/vehicle/modal/VehicleApprove';
 import VehicleBlock from '@/components/collection-point/vehicle/modal/VehicleBlock';
 import SearchBox from '@/components/ui/SearchBox';
+import Pagination from '@/components/ui/Pagination';
 import { VehicleItem } from '@/services/collection-point/VehicleService';
 
 const VehiclePage: React.FC = () => {
-    const { vehicles, loading, actionLoading, fetchVehicles, approveVehicle, blockVehicle } = useVehicleContext();
+    const { vehicles, loading, actionLoading, page, totalPages, stats, fetchVehicles, fetchVehicleStats, approveVehicle, blockVehicle, setPage } = useVehicleContext();
     const [filterStatus, setFilterStatus] = useState<VehicleStatusFilter>('Đang hoạt động');
     const [search, setSearch] = useState('');
     const [selectedVehicle, setSelectedVehicle] = useState<VehicleItem | null>(null);
@@ -20,13 +21,27 @@ const VehiclePage: React.FC = () => {
     const [pendingApproveId, setPendingApproveId] = useState<string | null>(null);
     const [pendingBlockId, setPendingBlockId] = useState<string | null>(null);
 
+    const PAGE_LIMIT = 10;
+
+    const plateNumberFilter = useMemo(() => {
+        const q = search.trim();
+        return q ? q : undefined;
+    }, [search]);
+
     useEffect(() => {
-        fetchVehicles(filterStatus);
-    }, [fetchVehicles, filterStatus]);
+        setPage(1);
+        fetchVehicles(filterStatus, 1, PAGE_LIMIT, plateNumberFilter);
+        fetchVehicleStats(plateNumberFilter);
+    }, [fetchVehicles, fetchVehicleStats, filterStatus, plateNumberFilter, setPage]);
 
     const handleFilterChange = (status: VehicleStatusFilter) => {
         setFilterStatus(status);
     };
+
+    const handlePageChange = useCallback((nextPage: number) => {
+        setPage(nextPage);
+        fetchVehicles(filterStatus, nextPage, PAGE_LIMIT, plateNumberFilter);
+    }, [fetchVehicles, filterStatus, plateNumberFilter, setPage]);
 
     const handleViewDetail = (vehicle: VehicleItem) => {
         setSelectedVehicle(vehicle);
@@ -37,14 +52,6 @@ const VehiclePage: React.FC = () => {
         setShowDetail(false);
         setSelectedVehicle(null);
     };
-
-    const filteredVehicles = vehicles.filter((v) => {
-        const q = search.toLowerCase();
-        return (
-            v.plateNumber?.toLowerCase().includes(q) ||
-            v.vehicleType?.toLowerCase().includes(q)
-        );
-    });
 
     return (
         <div className='max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8'>
@@ -60,22 +67,38 @@ const VehiclePage: React.FC = () => {
                     <SearchBox
                         value={search}
                         onChange={setSearch}
-                        placeholder='Tìm kiếm biển số, loại xe...'
+                        placeholder='Tìm kiếm biển số...'
                     />
                 </div>
             </div>
 
             {/* Filter */}
-            <VehicleFilter status={filterStatus} onFilterChange={handleFilterChange} />
+            <VehicleFilter
+                status={filterStatus}
+                stats={{
+                    active: stats.active,
+                    inactive: stats.inactive,
+                }}
+                onFilterChange={handleFilterChange}
+            />
 
             {/* List */}
             <VehicleList
-                vehicles={filteredVehicles}
+                vehicles={vehicles}
                 loading={loading}
                 onViewDetail={handleViewDetail}
                 onApprove={(id) => setPendingApproveId(id)}
                 onBlock={(id) => setPendingBlockId(id)}
                 actionLoading={actionLoading}
+                page={page}
+                limit={PAGE_LIMIT}
+            />
+
+            {/* Pagination */}
+            <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
             />
 
             {/* Detail modal */}

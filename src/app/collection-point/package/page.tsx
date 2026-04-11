@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePackageContext } from '@/contexts/collection-point/PackageContext';
 import PackageList from '@/components/collection-point/package/PackageList';
 import PackageDetail from '@/components/collection-point/package/modal/PackageDetail';
@@ -41,6 +41,7 @@ const PackagePage: React.FC = () => {
     const [packageToUpdateStatus, setPackageToUpdateStatus] = useState<string | null>(null);
     const [showScanDeliveryModal, setShowScanDeliveryModal] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState('');
+    const initializedDefaultStatusRef = useRef(false);
 
     const paginatedPackages = useMemo(
         () =>
@@ -102,9 +103,12 @@ const PackagePage: React.FC = () => {
         }
     }, [filter.fromDate, filter.toDate, setFilter]);
 
-    // Ensure default status is 'Đang đóng gói' when first entering the page
+    // Ensure default status only once when entering the page
     useEffect(() => {
-        if (!filter.status || filter.status !== 'Đang đóng gói') {
+        if (initializedDefaultStatusRef.current) return;
+        initializedDefaultStatusRef.current = true;
+
+        if (filter.status !== 'Đang đóng gói') {
             setFilter({ status: 'Đang đóng gói', page: 1 });
         }
     }, [filter.status, setFilter]);
@@ -164,6 +168,7 @@ const PackagePage: React.FC = () => {
         try {
             await updateStatus(packageToUpdateStatus);
             await fetchPackages({ page: filter.page || 1 });
+            setShowConfirmModal(false);
             setShowDetailModal(false);
             setSelectedPackage(null);
             setPackageToUpdateStatus(null);

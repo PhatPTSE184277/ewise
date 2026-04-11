@@ -2,8 +2,8 @@ import { IoFilterOutline } from 'react-icons/io5';
 import React from 'react';
 
 interface SmallCollectionFilterProps {
-    status: string;
-    onFilterChange: (status: string) => void;
+    status: 'Đang hoạt động' | 'Không hoạt động';
+    onFilterChange: (status: 'Đang hoạt động' | 'Không hoạt động') => void;
 }
 
 const SmallCollectionFilter: React.FC<SmallCollectionFilterProps> = ({
@@ -17,19 +17,19 @@ const SmallCollectionFilter: React.FC<SmallCollectionFilterProps> = ({
                     <IoFilterOutline className="text-primary-600" size={16} />
                 </span>
                 <button
-                    onClick={() => onFilterChange('active')}
+                    onClick={() => onFilterChange('Đang hoạt động')}
                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer min-w-[110px] ${
-                        status === 'active'
+                        status === 'Đang hoạt động'
                             ? 'bg-primary-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                 >
-                    Hoạt động
+                    Đang hoạt động
                 </button>
                 <button
-                    onClick={() => onFilterChange('inactive')}
+                    onClick={() => onFilterChange('Không hoạt động')}
                     className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer min-w-[110px] ${
-                        status === 'inactive'
+                        status === 'Không hoạt động'
                             ? 'bg-primary-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}

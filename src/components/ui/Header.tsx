@@ -259,12 +259,11 @@ const Header = ({ href, profileHref, onMenuClick }: HeaderProps) => {
 
     // Removed role-based text color computation — use default primary text color
 
-    // Build greeting text, include company name for warehouse admins
-    const greetingText = user?.role
-        ? (user.role === 'AdminWarehouse' && user.companyName
-            ? `${translateRole(user.role)} - Công ty ${user.companyName}`
-            : translateRole(user.role))
-        : '';
+
+    // Build greeting text, show warehouse name and company for AdminWarehouse
+    const greetingText = user?.role === 'AdminWarehouse'
+        ? `Chào mừng Quản trị kho${user.smallCollectionName ? ' - ' + user.smallCollectionName : ''}${user.companyName ? ' (' + user.companyName + ')' : ''}`
+        : user?.role ? translateRole(user.role) : '';
 
     return (
         <nav className={`bg-white shadow-sm sticky top-0 z-50`}>
