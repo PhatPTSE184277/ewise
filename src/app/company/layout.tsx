@@ -14,6 +14,7 @@ import { CapacityProvider } from '@/contexts/company/CapacityContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import { UserProvider } from '@/contexts/UserContext';
 import { useAuth } from '@/hooks/useAuth';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
     const { toast, hideToast } = useNotifications();
@@ -50,24 +51,26 @@ export default function LargeCollectorLayout({
     children: React.ReactNode;
 }) {
     return (
-        <NotificationProvider>
-            <UserProvider>
-                <CollectorProvider>
-                    <SmallCollectionProvider>
-                        <ProductQueryProvider>
-                            <ShiftProvider>
-                                <VehicleProvider>
-                                    <SettingGroupProvider>
-                                        <CapacityProvider>
-                                            <LayoutContent>{children}</LayoutContent>
-                                        </CapacityProvider>
-                                    </SettingGroupProvider>
-                                </VehicleProvider>
-                            </ShiftProvider>
-                        </ProductQueryProvider>
-                    </SmallCollectionProvider>
-                </CollectorProvider>
-            </UserProvider>
-        </NotificationProvider>
+        <ProtectedRoute allowedRoles={['AdminCompany']}>
+            <NotificationProvider>
+                <UserProvider>
+                    <CollectorProvider>
+                        <SmallCollectionProvider>
+                            <ProductQueryProvider>
+                                <ShiftProvider>
+                                    <VehicleProvider>
+                                        <SettingGroupProvider>
+                                            <CapacityProvider>
+                                                <LayoutContent>{children}</LayoutContent>
+                                            </CapacityProvider>
+                                        </SettingGroupProvider>
+                                    </VehicleProvider>
+                                </ShiftProvider>
+                            </ProductQueryProvider>
+                        </SmallCollectionProvider>
+                    </CollectorProvider>
+                </UserProvider>
+            </NotificationProvider>
+        </ProtectedRoute>
     );
 }

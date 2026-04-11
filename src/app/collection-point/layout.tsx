@@ -15,6 +15,7 @@ import { DashboardProvider } from '@/contexts/collection-point/DashboardContext'
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import { VehicleProvider } from '@/contexts/collection-point/VehicleContext';
 import { useAuth } from '@/hooks/useAuth';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
     const { toast, hideToast } = useNotifications();
@@ -55,26 +56,28 @@ export default function SmallCollectorLayout({
     children: React.ReactNode;
 }) {
     return (
-        <NotificationProvider>
-            <GroupingProvider>
-                <CollectionRouteProvider>
-                    <IWProductProvider>
-                        <PackageProvider>
-                            <SmallCollectorQRProvider>
-                                <UserProvider>
-                                    <CategoryProvider>
-                                        <DashboardProvider>
-                                                <VehicleProvider>
-                                                    <LayoutContent>{children}</LayoutContent>
-                                                </VehicleProvider>
-                                        </DashboardProvider>
-                                    </CategoryProvider>
-                                </UserProvider>
-                            </SmallCollectorQRProvider>
-                        </PackageProvider>
-                    </IWProductProvider>
-                </CollectionRouteProvider>
-            </GroupingProvider>
-        </NotificationProvider>
+        <ProtectedRoute allowedRoles={['AdminWarehouse']}>
+            <NotificationProvider>
+                <GroupingProvider>
+                    <CollectionRouteProvider>
+                        <IWProductProvider>
+                            <PackageProvider>
+                                <SmallCollectorQRProvider>
+                                    <UserProvider>
+                                        <CategoryProvider>
+                                            <DashboardProvider>
+                                                    <VehicleProvider>
+                                                        <LayoutContent>{children}</LayoutContent>
+                                                    </VehicleProvider>
+                                            </DashboardProvider>
+                                        </CategoryProvider>
+                                    </UserProvider>
+                                </SmallCollectorQRProvider>
+                            </PackageProvider>
+                        </IWProductProvider>
+                    </CollectionRouteProvider>
+                </GroupingProvider>
+            </NotificationProvider>
+        </ProtectedRoute>
     );
 }

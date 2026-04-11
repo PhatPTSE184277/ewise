@@ -20,6 +20,7 @@ import { CapacityProvider } from '@/contexts/admin/CapacityContext';
 import { VoucherProvider } from '@/contexts/admin/VoucherContext';
 import { CategoryProvider } from '@/contexts/admin/CategoryContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 function AdminLayoutContent({ children, sidebarOpen, setSidebarOpen }: { children: React.ReactNode; sidebarOpen: boolean; setSidebarOpen: (open: boolean) => void }) {
     const { toast, hideToast } = useNotifications();
@@ -78,38 +79,40 @@ export default function AdminLayout({
     }, []);
 
     return (
-        <NotificationProvider>
-            <SendNotiProvider>
-                <SpeedProvider>
-                    <AssignRecyclingProvider>
-                        <DistributeProductProvider>
-                            <CompanyConfigProvider>
-                            <RequestProvider>
-                                <UserProvider>
-                                    <CollectionCompanyProvider>
-                                        <SystemConfigProvider>
-                                            <TrackingProvider>
-                                                <CategoryProvider>
-                                                    <DashboardProvider>
-                                                        <CapacityProvider>
-                                                            <VoucherProvider>
-                                                                <AdminLayoutContent sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
-                                                                    {children}
-                                                                </AdminLayoutContent>
-                                                            </VoucherProvider>
-                                                        </CapacityProvider>
-                                                    </DashboardProvider>
-                                                </CategoryProvider>
-                                            </TrackingProvider>
-                                        </SystemConfigProvider>
-                                    </CollectionCompanyProvider>
-                                </UserProvider>
-                            </RequestProvider>
-                        </CompanyConfigProvider>
-                    </DistributeProductProvider>
-                </AssignRecyclingProvider>
-            </SpeedProvider>
-        </SendNotiProvider>
-        </NotificationProvider>
+        <ProtectedRoute allowedRoles={['Admin']}>
+            <NotificationProvider>
+                <SendNotiProvider>
+                    <SpeedProvider>
+                        <AssignRecyclingProvider>
+                            <DistributeProductProvider>
+                                <CompanyConfigProvider>
+                                <RequestProvider>
+                                    <UserProvider>
+                                        <CollectionCompanyProvider>
+                                            <SystemConfigProvider>
+                                                <TrackingProvider>
+                                                    <CategoryProvider>
+                                                        <DashboardProvider>
+                                                            <CapacityProvider>
+                                                                <VoucherProvider>
+                                                                    <AdminLayoutContent sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}>
+                                                                        {children}
+                                                                    </AdminLayoutContent>
+                                                                </VoucherProvider>
+                                                            </CapacityProvider>
+                                                        </DashboardProvider>
+                                                    </CategoryProvider>
+                                                </TrackingProvider>
+                                            </SystemConfigProvider>
+                                        </CollectionCompanyProvider>
+                                    </UserProvider>
+                                </RequestProvider>
+                            </CompanyConfigProvider>
+                        </DistributeProductProvider>
+                    </AssignRecyclingProvider>
+                </SpeedProvider>
+            </SendNotiProvider>
+            </NotificationProvider>
+        </ProtectedRoute>
     );
 }

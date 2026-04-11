@@ -95,7 +95,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     // Kết nối SignalR
     useNotificationHub({
         onAssignCompleted: handleNewNotification,
-        token: typeof window !== 'undefined' ? (localStorage.getItem('ewise_token') || sessionStorage.getItem('ewise_token') || '') : '',
+        token: typeof window !== 'undefined' ? (sessionStorage.getItem('ewise_token') || '') : '',
         userId: user?.userId || ''
     });
 

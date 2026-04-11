@@ -7,10 +7,12 @@ import {
     IoEyeOutline
 } from 'react-icons/io5';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { login, clearError } from '@/redux/reducers/authReducer';
+import { login, clearError, logout } from '@/redux/reducers/authReducer';
 import Toast from '@/components/ui/Toast';
 import FirstLoginChangePasswordModal from './FirstLoginChangePasswordModal';
 import { resetForgotPassword } from '@/services/AuthService';
+
+const FIRST_LOGIN_EMAIL_STORAGE_KEY = 'ewise_first_login_email';
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({ username: '', password: '' });
@@ -25,12 +27,12 @@ const LoginForm = () => {
     const toastMessage = (error as string) || '';
 
     useEffect(() => {
+        if (isAuthenticated && isFirstLogin) {
+            setTimeout(() => setShowFirstLoginChangePassword(true), 0);
+            return;
+        }
+
         if (isAuthenticated && user) {
-            // Check if first login
-            if (isFirstLogin || user.isFirstLogin) {
-                setTimeout(() => setShowFirstLoginChangePassword(true), 0);
-                return;
-            }
             // Route based on user role (backend enum)
             switch (user.role) {
                 case 'AdminWarehouse':
@@ -70,33 +72,22 @@ const LoginForm = () => {
     };
 
     const handleChangePasswordFirstLogin = async (newPassword: string, confirmPassword: string) => {
-        if (!user?.email) return;
+        const email =
+            user?.email ||
+            sessionStorage.getItem(FIRST_LOGIN_EMAIL_STORAGE_KEY) ||
+            formData.username ||
+            '';
 
-        await resetForgotPassword(user.email, newPassword, confirmPassword);
-        setShowFirstLoginChangePassword(false);
-        
-        // Redirect based on role after password change
-        if (user) {
-            switch (user.role) {
-                case 'AdminWarehouse':
-                    router.push('/collection-point/dashboard');
-                    break;
-                case 'Admin':
-                    router.push('/admin/dashboard');
-                    break;
-                case 'AdminCompany':
-                    router.push('/company/dashboard');
-                    break;
-                case 'Shipper':
-                    router.push('/shipper/package');
-                    break;
-                case 'RecyclingCompany':
-                    router.push('/recycle/package');
-                    break;
-                default:
-                    router.push('/');
-            }
+        if (!email) {
+            throw new Error('Không tìm thấy email để đổi mật khẩu');
         }
+
+        await resetForgotPassword(email, newPassword, confirmPassword);
+        setShowFirstLoginChangePassword(false);
+
+        // Bắt buộc đăng nhập lại bằng mật khẩu mới sau khi đổi thành công
+        await dispatch(logout());
+        router.replace('/');
     };
 
     return (

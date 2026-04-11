@@ -10,8 +10,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token =
-        localStorage.getItem("ewise_token") || sessionStorage.getItem("ewise_token");
+      const token = sessionStorage.getItem("ewise_token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -28,18 +27,16 @@ const publicEndpoints = ['/auth/login', '/auth/refresh-token', '/forgot-password
 
 const getStoredAccessToken = () =>
   typeof window !== 'undefined'
-    ? localStorage.getItem('ewise_token') || sessionStorage.getItem('ewise_token')
+    ? sessionStorage.getItem('ewise_token')
     : null;
 
 const getStoredRefreshToken = () =>
   typeof window !== 'undefined'
-    ? localStorage.getItem('ewise_refresh_token') || sessionStorage.getItem('ewise_refresh_token')
+    ? sessionStorage.getItem('ewise_refresh_token')
     : null;
 
 const saveTokens = (accessToken: string, refreshToken: string) => {
-  localStorage.setItem('ewise_token', accessToken);
   sessionStorage.setItem('ewise_token', accessToken);
-  localStorage.setItem('ewise_refresh_token', refreshToken);
   sessionStorage.setItem('ewise_refresh_token', refreshToken);
 };
 

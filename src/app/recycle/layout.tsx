@@ -9,6 +9,7 @@ import { QRProvider } from '@/contexts/recycle/QRContext';
 import { NotificationProvider, useNotifications } from '@/contexts/NotificationContext';
 import { UserProvider } from '@/contexts/UserContext';
 import { CategoryProvider } from '@/contexts/collection-point/CategoryContext';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
     const { toast, hideToast } = useNotifications();
@@ -44,16 +45,18 @@ export default function RecycleLayout({
     children: React.ReactNode;
 }) {
     return (
-        <UserProvider>
-            <NotificationProvider>
-                <QRProvider>
-                    <RecyclerPackageProvider>
-                        <CategoryProvider>
-                            <LayoutContent>{children}</LayoutContent>
-                        </CategoryProvider>
-                    </RecyclerPackageProvider>
-                </QRProvider>
-            </NotificationProvider>
-        </UserProvider>
+        <ProtectedRoute allowedRoles={['RecyclingCompany']}>
+            <UserProvider>
+                <NotificationProvider>
+                    <QRProvider>
+                        <RecyclerPackageProvider>
+                            <CategoryProvider>
+                                <LayoutContent>{children}</LayoutContent>
+                            </CategoryProvider>
+                        </RecyclerPackageProvider>
+                    </QRProvider>
+                </NotificationProvider>
+            </UserProvider>
+        </ProtectedRoute>
     );
 }

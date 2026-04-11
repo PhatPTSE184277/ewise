@@ -13,6 +13,9 @@ const initialState: AuthState = {
     notificationMessage: null,
 };
 
+const FIRST_LOGIN_STORAGE_KEY = 'ewise_is_first_login';
+const FIRST_LOGIN_EMAIL_STORAGE_KEY = 'ewise_first_login_email';
+
 // Async thunk for login
 export const login = createAsyncThunk(
     'auth/login',
@@ -21,14 +24,25 @@ export const login = createAsyncThunk(
             const response = await loginService(username, password);
             const { accessToken, refreshToken, isFirstLogin } = response;
             
-            // Save tokens to storage
-            localStorage.setItem('ewise_token', accessToken);
-            localStorage.setItem('ewise_refresh_token', refreshToken);
+            // Save auth data to sessionStorage only so closing the tab/browser requires login again.
             sessionStorage.setItem('ewise_token', accessToken);
             sessionStorage.setItem('ewise_refresh_token', refreshToken);
+            sessionStorage.setItem(FIRST_LOGIN_STORAGE_KEY, String(!!isFirstLogin));
+            localStorage.removeItem('ewise_token');
+            localStorage.removeItem('ewise_refresh_token');
+            localStorage.removeItem(FIRST_LOGIN_STORAGE_KEY);
+            localStorage.removeItem(FIRST_LOGIN_EMAIL_STORAGE_KEY);
+
+            // Keep a fallback identifier for first-login forced reset flow.
+            if (username) {
+                sessionStorage.setItem(FIRST_LOGIN_EMAIL_STORAGE_KEY, username);
+            }
             
             // Get user profile
             const userProfile = await getUserProfile();
+            if (userProfile?.email) {
+                sessionStorage.setItem(FIRST_LOGIN_EMAIL_STORAGE_KEY, userProfile.email);
+            }
             
             return { token: accessToken, user: userProfile, isFirstLogin };
         } catch (error: any) {
@@ -42,20 +56,28 @@ export const loadUserFromToken = createAsyncThunk(
     'auth/loadUserFromToken',
     async (_, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('ewise_token') || sessionStorage.getItem('ewise_token');
+            const token = sessionStorage.getItem('ewise_token');
+            const isFirstLogin = sessionStorage.getItem(FIRST_LOGIN_STORAGE_KEY) === 'true';
             
             if (!token) {
                 return rejectWithValue('No token found');
             }
             
             const userProfile = await getUserProfile();
+            if (userProfile?.email) {
+                sessionStorage.setItem(FIRST_LOGIN_EMAIL_STORAGE_KEY, userProfile.email);
+            }
             
-            return { token, user: userProfile };
+            return { token, user: userProfile, isFirstLogin };
         } catch (error: any) {
             localStorage.removeItem('ewise_token');
             sessionStorage.removeItem('ewise_token');
             localStorage.removeItem('ewise_refresh_token');
             sessionStorage.removeItem('ewise_refresh_token');
+            localStorage.removeItem(FIRST_LOGIN_STORAGE_KEY);
+            sessionStorage.removeItem(FIRST_LOGIN_STORAGE_KEY);
+            localStorage.removeItem(FIRST_LOGIN_EMAIL_STORAGE_KEY);
+            sessionStorage.removeItem(FIRST_LOGIN_EMAIL_STORAGE_KEY);
             return rejectWithValue(error?.response?.data?.message || 'Token không hợp lệ');
         }
     }
@@ -67,6 +89,10 @@ export const logout = createAsyncThunk('auth/logout', async () => {
     sessionStorage.removeItem('ewise_token');
     localStorage.removeItem('ewise_refresh_token');
     sessionStorage.removeItem('ewise_refresh_token');
+    localStorage.removeItem(FIRST_LOGIN_STORAGE_KEY);
+    sessionStorage.removeItem(FIRST_LOGIN_STORAGE_KEY);
+    localStorage.removeItem(FIRST_LOGIN_EMAIL_STORAGE_KEY);
+    sessionStorage.removeItem(FIRST_LOGIN_EMAIL_STORAGE_KEY);
     return null;
 });
 
@@ -104,6 +130,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.token = null;
             state.user = null;
+            state.isFirstLogin = false;
             state.error = action.payload as string;
         });
 
@@ -111,11 +138,12 @@ const authSlice = createSlice({
         builder.addCase(loadUserFromToken.pending, (state) => {
             state.loading = true;
         });
-        builder.addCase(loadUserFromToken.fulfilled, (state, action: PayloadAction<{ token: string; user: UserProfile }>) => {
+        builder.addCase(loadUserFromToken.fulfilled, (state, action: PayloadAction<{ token: string; user: UserProfile; isFirstLogin: boolean }>) => {
             state.loading = false;
             state.isAuthenticated = true;
             state.token = action.payload.token;
             state.user = action.payload.user;
+            state.isFirstLogin = action.payload.isFirstLogin;
             state.error = null;
         });
         builder.addCase(loadUserFromToken.rejected, (state) => {

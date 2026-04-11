@@ -162,7 +162,7 @@ const DistributeProductPage: React.FC = () => {
 
     useNotificationHub({
         onAssignCompleted: handleDistributeCompleted,
-        token: typeof window !== 'undefined' ? (localStorage.getItem('ewise_token') || sessionStorage.getItem('ewise_token') || '') : '',
+        token: typeof window !== 'undefined' ? (sessionStorage.getItem('ewise_token') || '') : '',
         userId: user?.userId || ''
     });
 

@@ -19,7 +19,7 @@ const ROUTE_ROLE_MAP: Record<string, string[]> = {
 };
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-    const { isAuthenticated, loading, user } = useAuth();
+    const { isAuthenticated, loading, user, isFirstLogin } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -27,7 +27,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         // Kiểm tra token thực tế trong localStorage/sessionStorage
         const checkToken = () => {
             if (typeof window !== 'undefined') {
-                const token = localStorage.getItem('ewise_token') || sessionStorage.getItem('ewise_token');
+                const token = sessionStorage.getItem('ewise_token');
                 if (!token) {
                     // Không có token, redirect ngay
                     router.push('/');
@@ -45,6 +45,12 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
 
         // Nếu chưa đăng nhập thì redirect về login
         if (!isAuthenticated || !user) {
+            router.push('/');
+            return;
+        }
+
+        // Bắt buộc đổi mật khẩu lần đầu trước khi vào các route nội bộ
+        if (isFirstLogin || user.isFirstLogin) {
             router.push('/');
             return;
         }
@@ -69,11 +75,11 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
                 }
             }
         }
-    }, [isAuthenticated, loading, user, router, pathname, allowedRoles]);
+    }, [isAuthenticated, loading, user, isFirstLogin, router, pathname, allowedRoles]);
 
     // Kiểm tra token thực tế
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('ewise_token') || sessionStorage.getItem('ewise_token');
+        const token = sessionStorage.getItem('ewise_token');
         if (!token) {
             return null;
         }
@@ -90,6 +96,10 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
 
     // Chưa đăng nhập
     if (!isAuthenticated || !user) {
+        return null;
+    }
+
+    if (isFirstLogin || user.isFirstLogin) {
         return null;
     }
 

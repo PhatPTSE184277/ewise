@@ -13,19 +13,36 @@ const FirstLoginChangePasswordModal: React.FC<FirstLoginChangePasswordModalProps
     const [loading, setLoading] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [newPasswordError, setNewPasswordError] = useState<string | null>(null);
+    const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+
+    const validate = (): boolean => {
+        let ok = true;
+        if (!newPassword) {
+            setNewPasswordError('Vui lòng nhập mật khẩu mới');
+            ok = false;
+        } else if (newPassword.length < 6) {
+            setNewPasswordError('Mật khẩu phải có ít nhất 6 ký tự');
+            ok = false;
+        } else {
+            setNewPasswordError(null);
+        }
+
+        if (!confirmPassword) {
+            setConfirmPasswordError('Vui lòng xác nhận mật khẩu');
+            ok = false;
+        } else if (newPassword !== confirmPassword) {
+            setConfirmPasswordError('Mật khẩu không khớp');
+            ok = false;
+        } else {
+            setConfirmPasswordError(null);
+        }
+
+        return ok;
+    };
 
     const handleSubmit = async () => {
-        if (!newPassword || !confirmPassword) {
-            return;
-        }
-
-        if (newPassword.length < 6) {
-            return;
-        }
-
-        if (newPassword !== confirmPassword) {
-            return;
-        }
+        if (!validate()) return;
 
         setLoading(true);
         try {
@@ -65,9 +82,13 @@ const FirstLoginChangePasswordModal: React.FC<FirstLoginChangePasswordModalProps
                                 id='newPassword'
                                 type={showNewPassword ? 'text' : 'password'}
                                 value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setNewPassword(e.target.value);
+                                    if (newPasswordError) setNewPasswordError(null);
+                                    if (confirmPasswordError && confirmPassword === e.target.value) setConfirmPasswordError(null);
+                                }}
                                 placeholder='Nhập mật khẩu mới'
-                                className='w-full pl-10 pr-10 py-2 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400'
+                                className={`w-full pl-10 pr-10 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400 ${newPasswordError ? 'border border-red-500' : 'border border-primary-200'}`}
                             />
                             <button
                                 type='button'
@@ -77,6 +98,7 @@ const FirstLoginChangePasswordModal: React.FC<FirstLoginChangePasswordModalProps
                                 {showNewPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
                             </button>
                         </div>
+                        {newPasswordError && <p className='mt-2 text-xs text-red-600'>{newPasswordError}</p>}
                     </div>
 
                     <div>
@@ -89,9 +111,12 @@ const FirstLoginChangePasswordModal: React.FC<FirstLoginChangePasswordModalProps
                                 id='confirmPassword'
                                 type={showConfirmPassword ? 'text' : 'password'}
                                 value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setConfirmPassword(e.target.value);
+                                    if (confirmPasswordError) setConfirmPasswordError(null);
+                                }}
                                 placeholder='Xác nhận mật khẩu mới'
-                                className='w-full pl-10 pr-10 py-2 border border-primary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400'
+                                className={`w-full pl-10 pr-10 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400 ${confirmPasswordError ? 'border border-red-500' : 'border border-primary-200'}`}
                             />
                             <button
                                 type='button'
@@ -101,11 +126,13 @@ const FirstLoginChangePasswordModal: React.FC<FirstLoginChangePasswordModalProps
                                 {showConfirmPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
                             </button>
                         </div>
+                        {confirmPasswordError && <p className='mt-2 text-xs text-red-600'>{confirmPasswordError}</p>}
                     </div>
 
                     <button
+                        type='button'
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={loading || !!newPasswordError || !!confirmPasswordError || !newPassword || !confirmPassword}
                         className='w-full bg-primary-600 text-white font-semibold py-2 rounded-lg hover:bg-primary-700 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
                     >
                         {loading ? 'Đang đổi mật khẩu...' : 'Đổi mật khẩu'}
